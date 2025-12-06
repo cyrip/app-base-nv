@@ -16,7 +16,6 @@ const messages = ref([]);
 const loadingMessages = ref(false);
 const creatingChannel = ref(false);
 const showChannelModal = ref(false);
-const selectedUserToAdd = ref(null);
 const userSearchTerm = ref('');
 const debouncedSearchTerm = ref('');
 const showUserDropdown = ref(false);
@@ -46,13 +45,13 @@ const loadChannels = async () => {
 };
 
 const loadUsers = async () => {
+  console.log('[chat] loading users...');
   try {
-    console.log('[chat] loading users...');
     const res = await axios.get(`${API_URL}/users`, authHeaders());
-    console.log('[chat] users loaded', res.data?.length);
     users.value = res.data;
     usersLoaded.value = true;
     usersError.value = '';
+    console.log('[chat] users loaded', users.value.length);
   } catch (e) {
     console.error('Failed to load users', e);
     users.value = [];
@@ -79,14 +78,44 @@ const loadMessages = async (channelId) => {
   }
 };
 
+const handleKeydown = (e) => {
+  // Enter without Ctrl sends message
+  if (e.key === 'Enter' && !e.ctrlKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+  // Ctrl+Enter adds new line (default behavior, just let it happen)
+};
+
 const sendMessage = async () => {
   if (!newMessage.value.trim() || !activeChannelId.value) return;
   const content = newMessage.value;
   newMessage.value = '';
+  
+  // Optimistically add message to UI
+  const tempMessage = {
+    id: Date.now(),
+    content,
+    fromUserId: authStore.user?.id,
+    channelId: activeChannelId.value,
+    createdAt: new Date().toISOString(),
+    FromUser: {
+      email: authStore.user?.email
+    }
+  };
+  messages.value.push(tempMessage);
+  
   try {
-    await axios.post(`${API_URL}/channels/${activeChannelId.value}/messages`, { content }, authHeaders());
+    const res = await axios.post(`${API_URL}/channels/${activeChannelId.value}/messages`, { content }, authHeaders());
+    // Replace temp message with real one from server
+    const index = messages.value.findIndex(m => m.id === tempMessage.id);
+    if (index !== -1 && res.data) {
+      messages.value[index] = res.data;
+    }
   } catch (e) {
     console.error('Failed to send message', e);
+    // Remove temp message on error
+    messages.value = messages.value.filter(m => m.id !== tempMessage.id);
   }
 };
 
@@ -103,7 +132,6 @@ const createChannel = async () => {
     newChannel.name = '';
     newChannel.participantIds = [];
     showChannelModal.value = false;
-    selectedUserToAdd.value = null;
   } catch (e) {
     console.error('Failed to create channel', e);
   } finally {
@@ -111,20 +139,14 @@ const createChannel = async () => {
   }
 };
 
-const addParticipant = () => {
-  if (!selectedUserToAdd.value) return;
-  const idNum = Number(selectedUserToAdd.value);
+const selectUser = (id) => {
+  const idNum = Number(id);
   if (!newChannel.participantIds.includes(idNum)) {
     newChannel.participantIds.push(idNum);
   }
-  selectedUserToAdd.value = null;
+  console.log('[chat] selected user', idNum, newChannel.participantIds);
   showUserDropdown.value = false;
   userSearchTerm.value = '';
-};
-
-const selectUser = (id) => {
-  selectedUserToAdd.value = id;
-  addParticipant();
 };
 
 const removeParticipant = (id) => {
@@ -164,7 +186,11 @@ const setupSocket = () => {
   if (!socket) return;
   socket.on('channel:message', (msg) => {
     if (msg.channelId === activeChannelId.value) {
-      messages.value.push(msg);
+      // Avoid duplicates - check if message already exists
+      const exists = messages.value.some(m => m.id === msg.id);
+      if (!exists) {
+        messages.value.push(msg);
+      }
     }
   });
   socket.on('channel:created', (channel) => {
@@ -172,17 +198,17 @@ const setupSocket = () => {
   });
 };
 
-watch(showChannelModal, async (val) => {
+watch(showChannelModal, (val) => {
   if (val) {
-    await loadUsers();
-    console.log('[chat] modal opened, users length', users.value?.length);
     showUserDropdown.value = true;
     userSearchTerm.value = '';
     debouncedSearchTerm.value = '';
+    console.log('[chat] channel modal opened');
   } else {
     if (searchDebounceTimer) {
       clearTimeout(searchDebounceTimer);
     }
+    console.log('[chat] channel modal closed');
   }
 });
 
@@ -196,11 +222,8 @@ const addChannelIfMissing = (channel) => {
 
 const filteredUsers = computed(() => {
   const term = debouncedSearchTerm.value?.toLowerCase() || '';
-  console.log('[chat] filtering users, term:', term, 'total:', users.value?.length);
   const list = Array.isArray(users.value) ? users.value : [];
-  const result = !term ? list : list.filter(u => u.email?.toLowerCase().includes(term));
-  console.log('[chat] filteredUsers length', result.length);
-  return result;
+  return !term ? list : list.filter(u => u.email?.toLowerCase().includes(term));
 });
 
 watch(userSearchTerm, (newVal) => {
@@ -212,22 +235,18 @@ watch(userSearchTerm, (newVal) => {
   }, 500);
 });
 
-const openUserDropdown = async () => {
-  console.log('[chat] openUserDropdown - modal open, current users length', users.value?.length);
+watch(filteredUsers, (val) => {
+  console.log('[chat] filtered users', val?.length);
+});
+
+const openUserDropdown = () => {
   showUserDropdown.value = true;
-  if (!usersLoaded.value && !usersError.value) {
-    await loadUsers();
-  }
-  console.log('[chat] dropdown users count', users.value?.length);
+  console.log('[chat] open user dropdown', {
+    users: users.value?.length,
+    filtered: filteredUsers.value?.length,
+    search: userSearchTerm.value
+  });
 };
-
-watch(users, (val) => {
-  console.log('[chat] users ref updated length', Array.isArray(val) ? val.length : 0);
-});
-
-watch(showUserDropdown, (val) => {
-  console.log('[chat] showUserDropdown changed', val);
-});
 
 onMounted(async () => {
   await loadChannels();
@@ -307,6 +326,7 @@ onMounted(async () => {
       <div class="mt-4">
         <textarea
           v-model="newMessage"
+          @keydown="handleKeydown"
           class="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-neon-blue"
           :placeholder="t('common.chat.messagePlaceholder')"
           rows="3"

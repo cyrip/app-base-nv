@@ -10,6 +10,18 @@ class UserController {
         }
     }
 
+    async createUser(req, res) {
+        try {
+            const isAdmin = req.user?.Roles?.some(r => r.name === 'admin');
+            if (!isAdmin) return res.status(403).json({ message: 'Access denied' });
+            const { email, password, languageId } = req.body;
+            const user = await userService.createUser({ email, password, languageId });
+            res.status(201).json(user);
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    }
+
     async updateUser(req, res) {
         try {
             const { email, role } = req.body;
@@ -27,6 +39,21 @@ class UserController {
                 res.status(403).json({ message: error.message });
             } else {
                 res.status(500).json({ error: error.message });
+            }
+        }
+    }
+
+    async deleteUser(req, res) {
+        try {
+            const isAdmin = req.user?.Roles?.some(r => r.name === 'admin');
+            if (!isAdmin) return res.status(403).json({ message: 'Access denied' });
+            const result = await userService.softDeleteUser(req.params.id);
+            res.json({ message: 'User deleted', user: result });
+        } catch (error) {
+            if (error.message === 'User not found') {
+                res.status(404).json({ message: error.message });
+            } else {
+                res.status(400).json({ error: error.message });
             }
         }
     }

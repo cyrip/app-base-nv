@@ -10,6 +10,8 @@
         "actions": "Aktionen"
     },
     "activeAgents": "{count} AKTIVE AGENTEN",
+    "createUser": "Benutzer erstellen",
+    "deleteConfirm": "Möchten Sie diesen Benutzer wirklich löschen?",
     "noUsers": "Keine Agenten im System gefunden.",
     "message": {
         "title": "Nachricht an {email}",

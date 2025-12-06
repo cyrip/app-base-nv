@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../../auth/stores/auth'
 import { socketState, sendPrivateMessage } from '../../../services/socket'
@@ -18,6 +18,11 @@ const roles = ref([])
 const groups = ref([])
 const selectedRoles = ref([])
 const selectedGroups = ref([])
+const showCreateModal = ref(false)
+const newUser = reactive({
+  email: '',
+  password: ''
+})
 
 const openMessageModal = (user) => {
   selectedUser.value = user
@@ -151,6 +156,36 @@ const fetchUsers = async () => {
   }
 }
 
+const createUser = async () => {
+  if (!newUser.email || !newUser.password) return
+  try {
+    await axios.post('http://localhost:3000/users', {
+      email: newUser.email,
+      password: newUser.password
+    }, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    await fetchUsers()
+    showCreateModal.value = false
+    newUser.email = ''
+    newUser.password = ''
+  } catch (e) {
+    error.value = e.response?.data?.error || e.message
+  }
+}
+
+const deleteUser = async (id) => {
+  if (!confirm(t('users.deleteConfirm'))) return
+  try {
+    await axios.delete(`http://localhost:3000/users/${id}`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    await fetchUsers()
+  } catch (e) {
+    error.value = e.response?.data?.error || e.message
+  }
+}
+
 onMounted(async () => {
   await fetchUsers()
   await fetchRoles()
@@ -164,8 +199,17 @@ onMounted(async () => {
       <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-blue to-neon-purple">
         {{ t('users.title') }}
       </h2>
-      <div class="px-4 py-2 text-xs font-bold text-neon-blue bg-neon-blue/10 rounded-full border border-neon-blue/20">
-        {{ t('users.activeAgents', { count: users.length }) }}
+      <div class="flex items-center gap-3">
+        <button
+          v-if="authStore.user?.Roles?.some(r => r.name === 'admin')"
+          @click="showCreateModal = true"
+          class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-neon-blue to-neon-purple rounded hover:opacity-90"
+        >
+          {{ t('users.createUser') }}
+        </button>
+        <div class="px-4 py-2 text-xs font-bold text-neon-blue bg-neon-blue/10 rounded-full border border-neon-blue/20">
+          {{ t('users.activeAgents', { count: users.length }) }}
+        </div>
       </div>
     </div>
 
@@ -209,16 +253,23 @@ onMounted(async () => {
                 </button>
                 <button
                   @click="openRoleModal(user)"
-                  class="px-3 py-1 text-xs font-bold text-neon-purple border border-neon-purple/30 rounded hover:bg-neon-purple/10 transition-colors"
-                  v-if="authStore.user?.Roles?.some(r => r.name === 'admin')"
-                >
-                  {{ t('users.roles.button') }}
-                </button>
-                <button
-                  @click="openGroupModal(user)"
-                  class="px-3 py-1 text-xs font-bold text-neon-blue border border-neon-blue/30 rounded hover:bg-neon-blue/10 transition-colors"
-                  v-if="authStore.user?.Roles?.some(r => r.name === 'admin')"
-                >
+              class="px-3 py-1 text-xs font-bold text-neon-purple border border-neon-purple/30 rounded hover:bg-neon-purple/10 transition-colors"
+              v-if="authStore.user?.Roles?.some(r => r.name === 'admin')"
+            >
+              {{ t('users.roles.button') }}
+            </button>
+            <button
+              v-if="authStore.user?.Roles?.some(r => r.name === 'admin') && user.id !== authStore.user?.id"
+              @click="deleteUser(user.id)"
+              class="px-3 py-1 text-xs font-bold text-red-400 border border-red-400/30 rounded hover:bg-red-500/10 transition-colors"
+            >
+              {{ t('common.actions.delete') }}
+            </button>
+            <button
+              @click="openGroupModal(user)"
+              class="px-3 py-1 text-xs font-bold text-neon-blue border border-neon-blue/30 rounded hover:bg-neon-blue/10 transition-colors"
+              v-if="authStore.user?.Roles?.some(r => r.name === 'admin')"
+            >
                   {{ t('users.groups.button') }}
                 </button>
                 <div v-if="socketState.onlineUsers.has(user.id)" class="inline-flex items-center gap-2">
@@ -261,6 +312,57 @@ onMounted(async () => {
               class="px-6 py-2 text-sm font-bold text-deep-space bg-neon-blue rounded-lg hover:bg-white hover:shadow-[0_0_20px_rgba(0,243,255,0.5)] transition-all duration-300"
             >
               {{ t('common.actions.send') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div class="w-full max-w-md bg-[#0a0a1f] border border-neon-blue/30 rounded-xl shadow-[0_0_50px_rgba(0,243,255,0.1)] overflow-hidden">
+        <div class="p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-bold text-white">{{ t('users.createUser') }}</h3>
+            <button
+              @click="showCreateModal = false"
+              class="w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{{ t('auth.email') || 'Email' }}</label>
+              <input
+                v-model="newUser.email"
+                type="email"
+                class="w-full px-3 py-2 bg-black/30 border border-white/10 rounded text-white focus:outline-none focus:border-neon-blue"
+                placeholder="user@example.com"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{{ t('auth.password') || 'Password' }}</label>
+              <input
+                v-model="newUser.password"
+                type="password"
+                class="w-full px-3 py-2 bg-black/30 border border-white/10 rounded text-white focus:outline-none focus:border-neon-blue"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+          <div class="flex justify-end gap-3">
+            <button 
+              @click="showCreateModal = false"
+              class="px-4 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors"
+            >
+              {{ t('common.actions.cancel') }}
+            </button>
+            <button 
+              @click="createUser"
+              class="px-6 py-2 text-sm font-bold text-deep-space bg-neon-blue rounded-lg hover:bg-white hover:shadow-[0_0_20px_rgba(0,243,255,0.5)] transition-all duration-300"
+            >
+              {{ t('common.actions.create') }}
             </button>
           </div>
         </div>

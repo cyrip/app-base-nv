@@ -10,6 +10,8 @@
         "actions": "Műveletek"
     },
     "activeAgents": "{count} AKTÍV ÜGYNÖK",
+    "createUser": "Új felhasználó",
+    "deleteConfirm": "Biztosan törlöd ezt a felhasználót?",
     "noUsers": "Nincsenek ügynökök a rendszerben.",
     "message": {
         "title": "Üzenet neki: {email}",

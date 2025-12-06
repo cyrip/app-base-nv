@@ -6,12 +6,17 @@ const auth = require('../middleware/auth');
 // Get all users (Protected)
 router.get('/', auth, userController.getUsers);
 
+// Create user (Admin)
+router.post('/', auth, userController.createUser);
+
 // Current user profile
 router.get('/me', auth, userController.getProfile);
 router.put('/me', auth, userController.updateProfile);
 
 // Update user (Protected)
 router.put('/:id', auth, userController.updateUser);
+// Soft delete user (Admin)
+router.delete('/:id', auth, userController.deleteUser);
 
 // Assign role to user (Admin only)
 router.post('/:id/roles', auth, userController.assignRole);

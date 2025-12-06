@@ -14,7 +14,7 @@ class AuthService {
     async login(email, password) {
         const { User, Role, Language } = require('../models');
         const user = await User.findOne({
-            where: { email },
+            where: { email, isDeleted: false },
             include: [{
                 model: Role,
                 through: { attributes: [] },

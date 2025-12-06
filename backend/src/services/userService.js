@@ -6,6 +6,7 @@ class UserService {
     async getAllUsers() {
         return await User.findAll({
             attributes: { exclude: ['password'] },
+            where: { isDeleted: false },
             include: [{
                 model: Role,
                 through: { attributes: [] },
@@ -26,6 +27,9 @@ class UserService {
         const user = await User.findByPk(id);
         if (!user) {
             throw new Error('User not found');
+        }
+        if (user.isDeleted) {
+            throw new Error('User deleted');
         }
 
         // Authorization check
@@ -135,6 +139,7 @@ class UserService {
     async getProfile(userId) {
         const user = await User.findByPk(userId, {
             attributes: { exclude: ['password'] },
+            where: { isDeleted: false },
             include: [{
                 model: Role,
                 through: { attributes: [] },
@@ -161,6 +166,9 @@ class UserService {
         const user = await User.findByPk(userId);
         if (!user) {
             throw new Error('User not found');
+        }
+        if (user.isDeleted) {
+            throw new Error('User deleted');
         }
 
         if (newPassword) {
@@ -189,6 +197,27 @@ class UserService {
 
         await user.save();
         return this.getProfile(userId);
+    }
+
+    async createUser({ email, password, languageId }) {
+        const existing = await User.findOne({ where: { email } });
+        if (existing) throw new Error('Email already exists');
+        const hashed = await bcrypt.hash(password, 10);
+        let langId = languageId;
+        if (!langId) {
+            const defaultLanguage = await getDefaultLanguage();
+            langId = defaultLanguage?.id || null;
+        }
+        const user = await User.create({ email, password: hashed, languageId: langId });
+        return { id: user.id, email: user.email };
+    }
+
+    async softDeleteUser(id) {
+        const user = await User.findByPk(id);
+        if (!user) throw new Error('User not found');
+        user.isDeleted = true;
+        await user.save();
+        return { id: user.id };
     }
 }
 

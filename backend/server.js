@@ -25,6 +25,9 @@ const startServer = async () => {
         // Ensure message schema
         const ensureMessageSchema = require('./src/migrations/ensureMessageSchema');
         await ensureMessageSchema();
+        // Ensure user soft delete column
+        const ensureUserSoftDelete = require('./src/migrations/ensureUserSoftDelete');
+        await ensureUserSoftDelete();
 
         // Run seeders
         await seedLanguages();
