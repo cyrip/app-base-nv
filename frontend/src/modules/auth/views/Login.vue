@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import LanguageSwitcher from '../../../components/LanguageSwitcher.vue'
 
 const email = ref('')
 const password = ref('')
@@ -27,6 +28,9 @@ const handleLogin = async () => {
       <h2 class="text-3xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-neon-blue to-neon-purple">
         {{ t('auth.login.heading') }}
       </h2>
+      <div class="flex justify-center mb-6">
+        <LanguageSwitcher />
+      </div>
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div class="space-y-2">
           <label class="text-sm font-medium text-gray-400 uppercase tracking-wider">{{ t('auth.login.email') }}</label>

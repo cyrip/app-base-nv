@@ -1,23 +1,5 @@
 <template>
   <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
-    <!-- Connection Status -->
-    <div
-      class="px-4 py-2 rounded-full backdrop-blur-md border shadow-lg transition-all duration-300 flex items-center gap-2 pointer-events-auto"
-      :class="[
-        socketState.connected
-          ? 'bg-neon-blue/10 border-neon-blue/50 text-neon-blue'
-          : 'bg-red-500/10 border-red-500/50 text-red-500',
-      ]"
-    >
-      <div
-        class="w-2 h-2 rounded-full animate-pulse"
-        :class="[socketState.connected ? 'bg-neon-blue' : 'bg-red-500']"
-      ></div>
-      <span class="text-sm font-bold">{{
-        socketState.connected ? t('common.status.connected') : t('common.status.disconnected')
-      }}</span>
-    </div>
-
     <!-- Messages List -->
     <TransitionGroup
       name="list"
