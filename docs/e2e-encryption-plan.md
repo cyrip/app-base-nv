@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document outlines the architecture and implementation plan for adding end-to-end encryption (E2EE) to the chat application using public-key cryptography.
+This document outlines the architecture and implementation plan for adding **optional** end-to-end encryption (E2EE) to the chat application using public-key cryptography.
+
+**Key Feature**: Users can enable/disable encryption per channel or direct message, giving them flexibility to choose when they need maximum security.
 
 ## Security Architecture
 
@@ -123,6 +125,11 @@ async function storePrivateKey(privateKey, password) {
 
 **Database Schema Changes:**
 ```sql
+-- Add encryption settings to channels
+ALTER TABLE Channels ADD COLUMN encryptionEnabled BOOLEAN DEFAULT FALSE;
+ALTER TABLE Channels ADD COLUMN encryptionEnabledAt TIMESTAMP;
+ALTER TABLE Channels ADD COLUMN encryptionEnabledBy INTEGER REFERENCES Users(id);
+
 -- Add encryption metadata to messages
 ALTER TABLE Messages ADD COLUMN encrypted BOOLEAN DEFAULT FALSE;
 ALTER TABLE Messages ADD COLUMN encryptionMetadata JSONB;
@@ -221,21 +228,71 @@ class EncryptionService {
 ### Phase 3: UI/UX Considerations
 
 **Key Setup Flow:**
-1. On first login, prompt user to generate keys
+1. On first login, prompt user to generate keys (optional)
 2. Show key fingerprint for verification
 3. Option to export/backup keys (encrypted with password)
 4. Option to import existing keys
+5. User can skip key generation and enable it later
+
+**Encryption Toggle UI:**
+
+**Channel Settings:**
+```
+┌─────────────────────────────────────┐
+│ Channel Settings                    │
+├─────────────────────────────────────┤
+│ 🔒 End-to-End Encryption            │
+│                                     │
+│ [ ] Enable encryption for this      │
+│     channel                         │
+│                                     │
+│ ⚠️  Once enabled:                   │
+│ • All new messages will be encrypted│
+│ • All participants must have keys   │
+│ • Old messages remain unencrypted   │
+│ • Cannot be disabled                │
+│                                     │
+│ [Enable Encryption]                 │
+└─────────────────────────────────────┘
+```
+
+**Direct Message UI:**
+```
+┌─────────────────────────────────────┐
+│ Chat with @user                  🔓 │ ← Click to enable
+├─────────────────────────────────────┤
+│ Messages...                         │
+└─────────────────────────────────────┘
+
+After enabling:
+┌─────────────────────────────────────┐
+│ Chat with @user                  🔒 │ ← Encrypted
+├─────────────────────────────────────┤
+│ 🔒 This conversation is encrypted   │
+│ Messages...                         │
+└─────────────────────────────────────┘
+```
 
 **Message Display:**
-- Show lock icon for encrypted messages
-- Show verification badge when signature is valid
-- Show warning if signature verification fails
+- Show 🔒 lock icon for encrypted messages
+- Show 🔓 open lock for unencrypted messages
+- Show ✓ verification badge when signature is valid
+- Show ⚠️ warning if signature verification fails
 - Show "Waiting for keys..." for messages that can't be decrypted yet
+- Show "Encryption enabled" system message when toggled on
+
+**Channel List Indicators:**
+```
+📱 General Chat              🔓 (unencrypted)
+💼 Work Discussion          🔒 (encrypted)
+👥 Team Updates             🔓 (unencrypted)
+```
 
 **Security Indicators:**
 - Display participant key fingerprints in channel settings
 - Show when keys change (potential MITM warning)
 - Allow users to verify fingerprints out-of-band
+- Show encryption status in channel header
 
 ### Phase 4: Key Rotation & Recovery
 
@@ -296,17 +353,201 @@ class EncryptionService {
 ### Built-in:
 - **Web Crypto API**: Native browser support, no dependencies
 
+## Encryption Toggle Implementation
+
+### Backend API Endpoints:
+
+```javascript
+// Enable encryption for a channel
+POST /api/channels/:channelId/encryption/enable
+Body: { confirm: true }
+Response: { 
+  success: true, 
+  encryptionEnabled: true,
+  sessionKeyId: 'uuid'
+}
+
+// Get encryption status
+GET /api/channels/:channelId/encryption/status
+Response: {
+  enabled: boolean,
+  enabledAt: timestamp,
+  enabledBy: userId,
+  participantsWithKeys: [userId1, userId2],
+  participantsMissingKeys: [userId3]
+}
+
+// Check if user has encryption keys
+GET /api/users/me/encryption/status
+Response: {
+  hasKeys: boolean,
+  publicKeyFingerprint: 'abc123...',
+  keyCreatedAt: timestamp
+}
+```
+
+### Frontend Logic:
+
+```javascript
+// Check prerequisites before enabling encryption
+async function canEnableEncryption(channelId) {
+  // 1. Check if current user has keys
+  const userStatus = await api.get('/users/me/encryption/status');
+  if (!userStatus.hasKeys) {
+    return { 
+      canEnable: false, 
+      reason: 'You need to generate encryption keys first' 
+    };
+  }
+  
+  // 2. Check if all participants have keys
+  const channelStatus = await api.get(`/channels/${channelId}/encryption/status`);
+  if (channelStatus.participantsMissingKeys.length > 0) {
+    return {
+      canEnable: false,
+      reason: 'Some participants do not have encryption keys',
+      missingUsers: channelStatus.participantsMissingKeys
+    };
+  }
+  
+  return { canEnable: true };
+}
+
+// Enable encryption for channel
+async function enableEncryption(channelId) {
+  const check = await canEnableEncryption(channelId);
+  
+  if (!check.canEnable) {
+    showError(check.reason);
+    return;
+  }
+  
+  // Show confirmation dialog
+  const confirmed = await confirmDialog({
+    title: 'Enable End-to-End Encryption?',
+    message: 'Once enabled, all new messages will be encrypted. This cannot be undone.',
+    confirmText: 'Enable Encryption',
+    cancelText: 'Cancel'
+  });
+  
+  if (!confirmed) return;
+  
+  // Enable on backend
+  await api.post(`/channels/${channelId}/encryption/enable`, { confirm: true });
+  
+  // Generate and distribute session key
+  await generateAndDistributeSessionKey(channelId);
+  
+  // Show success message
+  showSuccess('Encryption enabled for this channel');
+  
+  // Reload channel to show encryption status
+  await reloadChannel(channelId);
+}
+```
+
+### Message Sending Logic:
+
+```javascript
+async function sendMessage(channelId, content) {
+  // Check if channel has encryption enabled
+  const channel = await getChannel(channelId);
+  
+  if (channel.encryptionEnabled) {
+    // Encrypt the message
+    const encrypted = await encryptionService.encryptMessage(
+      content,
+      channel.participants.map(p => p.publicKey)
+    );
+    
+    // Send encrypted message
+    await api.post(`/channels/${channelId}/messages`, {
+      content: encrypted.encryptedContent,
+      encrypted: true,
+      encryptionMetadata: {
+        algorithm: 'AES-256-GCM',
+        iv: encrypted.iv,
+        signature: encrypted.signature,
+        senderKeyId: currentUser.publicKeyId
+      }
+    });
+  } else {
+    // Send unencrypted message (normal flow)
+    await api.post(`/channels/${channelId}/messages`, {
+      content: content,
+      encrypted: false
+    });
+  }
+}
+```
+
+### Message Display Logic:
+
+```javascript
+async function displayMessage(message) {
+  if (message.encrypted) {
+    try {
+      // Decrypt the message
+      const decrypted = await encryptionService.decryptMessage(
+        message.content,
+        message.encryptionMetadata
+      );
+      
+      return {
+        ...message,
+        content: decrypted,
+        decrypted: true,
+        verified: true
+      };
+    } catch (error) {
+      return {
+        ...message,
+        content: '🔒 [Encrypted message - cannot decrypt]',
+        decrypted: false,
+        error: error.message
+      };
+    }
+  } else {
+    // Display unencrypted message as-is
+    return message;
+  }
+}
+```
+
 ## Migration Strategy
 
-### For Existing Messages:
-1. Keep unencrypted messages as-is (mark as legacy)
-2. New messages use encryption
-3. Option to "upgrade" channel to encrypted (all new messages encrypted)
+### For Existing Channels:
+1. **All existing channels start unencrypted** (default behavior)
+2. **Users can opt-in** to enable encryption per channel
+3. **Mixed mode**: Channels can have both encrypted and unencrypted messages
+   - Old messages remain unencrypted
+   - New messages (after enabling) are encrypted
+   - UI clearly shows which messages are encrypted
+
+### Encryption Toggle Rules:
+
+**Can Enable When:**
+- ✅ All participants have generated encryption keys
+- ✅ User has permission to modify channel settings
+- ✅ Channel is not already encrypted
+
+**Cannot Disable Once Enabled:**
+- ❌ Encryption is one-way (cannot be turned off)
+- ❌ Prevents accidental exposure of previously encrypted messages
+- ❌ If users want unencrypted chat, create a new channel
+
+**Handling New Participants:**
+- When someone joins an encrypted channel:
+  - Check if they have encryption keys
+  - If yes: Encrypt session key for them
+  - If no: Show warning, prompt them to generate keys
+  - They can see unencrypted messages but not encrypted ones until they have keys
 
 ### Gradual Rollout:
-1. Phase 1: Optional encryption (users opt-in)
-2. Phase 2: Encrypted by default (users can opt-out)
-3. Phase 3: Encryption mandatory for all new channels
+1. **Phase 1**: Optional encryption (users opt-in) ← **START HERE**
+2. **Phase 2**: Promote encryption (show benefits, encourage adoption)
+3. **Phase 3**: Encrypted by default for new channels (users can opt-out)
+4. **Phase 4**: Encryption mandatory for sensitive channels (admin policy)
 
 ## Testing Strategy
 
@@ -342,14 +583,133 @@ class EncryptionService {
 - **Lawful Intercept**: Document that you CAN'T access user messages
 - **Terms of Service**: Clarify that lost keys = lost messages
 
+## User Flows
+
+### Flow 1: First-Time User Enabling Encryption
+
+```
+1. User opens chat application
+2. Sees banner: "🔒 Enable secure messaging? Generate encryption keys"
+3. Clicks "Generate Keys"
+4. System generates key pair in browser
+5. Private key stored in IndexedDB (encrypted)
+6. Public key uploaded to server
+7. Shows success: "Encryption keys generated! You can now enable encryption for any conversation"
+8. User goes to a direct message
+9. Clicks 🔓 icon in header
+10. Confirms: "Enable encryption for this conversation?"
+11. System enables encryption
+12. All new messages are encrypted
+```
+
+### Flow 2: Enabling Encryption for Group Channel
+
+```
+1. User opens channel settings
+2. Sees "End-to-End Encryption" section
+3. Clicks "Enable Encryption"
+4. System checks:
+   - ✅ User has keys
+   - ✅ All 5 participants have keys
+5. Shows confirmation dialog with warnings
+6. User confirms
+7. System:
+   - Generates session key
+   - Encrypts session key for each participant
+   - Stores encrypted session keys
+   - Marks channel as encrypted
+8. Posts system message: "🔒 Encryption enabled by @user"
+9. All new messages are encrypted
+```
+
+### Flow 3: User Without Keys Joins Encrypted Channel
+
+```
+1. User joins encrypted channel
+2. System detects: User has no encryption keys
+3. Shows warning banner:
+   "⚠️ This channel uses encryption. Generate keys to read encrypted messages."
+4. User can:
+   - See old unencrypted messages
+   - See encrypted messages as "🔒 [Encrypted - generate keys to read]"
+   - Cannot send messages until keys generated
+5. User clicks "Generate Keys"
+6. Keys generated
+7. System encrypts session key for new user
+8. User can now read and send encrypted messages
+```
+
+## Feature Flags & Configuration
+
+```javascript
+// config/features.js
+export const ENCRYPTION_CONFIG = {
+  // Enable/disable encryption feature globally
+  enabled: true,
+  
+  // Require all users to generate keys on signup
+  requireKeysOnSignup: false,
+  
+  // Allow users to enable encryption per channel
+  allowPerChannelToggle: true,
+  
+  // Default encryption for new channels
+  encryptByDefault: false,
+  
+  // Allow disabling encryption (not recommended)
+  allowDisable: false,
+  
+  // Minimum participants with keys to enable encryption
+  minParticipantsWithKeys: 1.0, // 100% must have keys
+  
+  // Show encryption prompts
+  showEncryptionPrompts: true,
+  
+  // Crypto library to use
+  cryptoLibrary: 'web-crypto-api', // or 'libsodium'
+  
+  // Key algorithm
+  keyAlgorithm: 'RSA-OAEP', // or 'X25519'
+  keySize: 4096
+};
+```
+
 ## Next Steps
 
-1. Review and approve this architecture
-2. Create detailed technical specifications
+1. ✅ Review and approve this architecture
+2. Create detailed technical specifications (if needed)
 3. Set up development environment with crypto libraries
-4. Implement Phase 1 (Key Management)
-5. Implement Phase 2 (Message Encryption)
-6. Security audit before production deployment
+4. **Implement Phase 1**: Key Management (optional, user-initiated)
+5. **Implement Phase 2**: Message Encryption (per-channel toggle)
+6. **Implement Phase 3**: UI/UX (encryption toggle, indicators)
+7. **Implement Phase 4**: Key Rotation & Recovery
+8. Security audit before production deployment
+
+## Quick Start Implementation Order
+
+### Sprint 1: Foundation
+- [ ] Add database columns for encryption settings
+- [ ] Create encryption service with Web Crypto API
+- [ ] Implement key generation UI
+- [ ] Store keys in IndexedDB
+
+### Sprint 2: Core Encryption
+- [ ] Implement message encryption/decryption
+- [ ] Add encryption toggle to channel settings
+- [ ] Handle encrypted message sending
+- [ ] Handle encrypted message display
+
+### Sprint 3: UI/UX Polish
+- [ ] Add encryption indicators (🔒/🔓)
+- [ ] Show encryption status in channel list
+- [ ] Add key fingerprint verification
+- [ ] Handle edge cases (missing keys, etc.)
+
+### Sprint 4: Advanced Features
+- [ ] Key backup/export
+- [ ] Key rotation
+- [ ] Group encryption with key distribution
+- [ ] Security warnings and notifications
 
 ## References
 
