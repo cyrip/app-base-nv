@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../../auth/stores/auth'
+import { socketState } from '../../../services/socket'
 
 const users = ref([])
 const authStore = useAuthStore()
@@ -55,9 +56,13 @@ onMounted(async () => {
               </span>
             </td>
             <td class="p-4 text-right">
-              <div class="inline-flex items-center gap-2">
+              <div v-if="socketState.onlineUsers.has(user.id)" class="inline-flex items-center gap-2">
                 <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
                 <span class="text-xs text-green-400">ONLINE</span>
+              </div>
+              <div v-else class="inline-flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-gray-500"></div>
+                <span class="text-xs text-gray-500">OFFLINE</span>
               </div>
             </td>
           </tr>
