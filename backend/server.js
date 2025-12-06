@@ -17,6 +17,21 @@ const startServer = async () => {
         // Run seeders
         await seedUsers();
 
+        // Initialize Queue
+        const { agentQueue } = require('./src/config/queue');
+
+        app.post('/api/jobs', async (req, res) => {
+            try {
+                const job = await agentQueue.add({
+                    type: 'agent-task',
+                    payload: req.body
+                });
+                res.json({ id: job.id, message: 'Job added to queue' });
+            } catch (error) {
+                res.status(500).json({ error: 'Failed to add job to queue' });
+            }
+        });
+
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
