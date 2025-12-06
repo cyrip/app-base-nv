@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const roleController = require('../controllers/roleController');
-const { verifyToken, requirePermission } = require('../middleware/auth');
+const { requirePermission } = require('../middleware/auth');
+const auth = require('../middleware/auth');
 
-// All role routes require authentication and role.manage permission
-router.use(verifyToken);
+// All role routes require authentication
+router.use(auth);
 
 // List all roles
 router.get('/', roleController.getRoles);

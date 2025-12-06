@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const groupController = require('../controllers/groupController');
-const { verifyToken, requirePermission } = require('../middleware/auth');
+const { requirePermission } = require('../middleware/auth');
+const auth = require('../middleware/auth');
 
-// All group routes require authentication and group.manage permission
-router.use(verifyToken);
+// All group routes require authentication
+router.use(auth);
 
 // List all groups
 router.get('/', groupController.getGroups);

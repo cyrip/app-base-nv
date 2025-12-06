@@ -91,6 +91,13 @@ onMounted(async () => {
                 >
                   MESSAGE
                 </button>
+                <router-link
+                  to="/roles"
+                  class="px-3 py-1 text-xs font-bold text-neon-purple border border-neon-purple/30 rounded hover:bg-neon-purple/10 transition-colors"
+                  v-if="authStore.user?.Roles?.some(r => r.name === 'admin')"
+                >
+                  MANAGE ROLES
+                </router-link>
                 <div v-if="socketState.onlineUsers.has(user.id)" class="inline-flex items-center gap-2">
                   <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
                   <span class="text-xs text-green-400">ONLINE</span>
