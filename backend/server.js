@@ -4,14 +4,27 @@ const sequelize = require('./src/config/database');
 
 const PORT = process.env.PORT || 3000;
 
+const seedUsers = require('./src/seeders/init.js');
+
 // Database sync and server start
-sequelize.sync({ force: false })
-    .then(() => {
-        console.log('Database connected and synced');
+const startServer = async () => {
+    try {
+        await sequelize.authenticate();
+        console.log('Database connection established successfully.');
+        await sequelize.sync({ force: false });
+        console.log('Database synced');
+
+        // Run seeders
+        await seedUsers();
+
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
-    })
-    .catch(err => {
-        console.error('Database connection failed:', err);
-    });
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+        console.log('Retrying in 5 seconds...');
+        setTimeout(startServer, 5000);
+    }
+};
+
+startServer();
