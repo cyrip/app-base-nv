@@ -3,6 +3,7 @@ import { RouterView, useRouter } from 'vue-router';
 import { onMounted, onUnmounted } from 'vue';
 import { initSocket, disconnectSocket, socketState } from './services/socket';
 import SocketStatus from './components/SocketStatus.vue';
+import ToastContainer from './components/ToastContainer.vue';
 import { useAuthStore } from './modules/auth/stores/auth';
 
 const authStore = useAuthStore();
@@ -71,6 +72,9 @@ onUnmounted(() => {
 
     <!-- Socket Status & Messages -->
     <SocketStatus />
+
+    <!-- Toast Notifications -->
+    <ToastContainer />
   </div>
 </template>
 

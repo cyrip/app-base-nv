@@ -38,7 +38,15 @@ const requireRole = (roleName) => {
             return res.status(401).json({ message: 'Authentication required' });
         }
 
-        const hasRole = await req.user.hasRole(roleName);
+        // Check if Roles are already loaded (from verifyToken middleware)
+        let hasRole = false;
+        if (req.user.Roles && Array.isArray(req.user.Roles)) {
+            hasRole = req.user.Roles.some(role => role.name === roleName);
+        } else {
+            // Fallback to helper method if Roles not loaded
+            hasRole = await req.user.hasRole(roleName);
+        }
+
         if (!hasRole) {
             return res.status(403).json({ message: `Requires ${roleName} role` });
         }
