@@ -5,6 +5,7 @@ export const socketState = reactive({
     connected: false,
     messages: [],
     onlineUsers: new Set(),
+    channelMessages: {}
 });
 
 let socket;
@@ -47,17 +48,6 @@ export const initSocket = (token) => {
         });
     });
 
-    // Listen for generic messages
-    socket.on("message", (data) => {
-        console.log("Message received:", data);
-        socketState.messages.unshift({
-            id: Date.now(),
-            type: "message",
-            content: data,
-            timestamp: new Date().toLocaleTimeString(),
-        });
-    });
-
     // Online status events
     socket.on("online-users", (users) => {
         socketState.onlineUsers = new Set(users);
@@ -74,11 +64,20 @@ export const initSocket = (token) => {
     socket.on("private-message", (data) => {
         console.log("Private message received:", data);
         socketState.messages.unshift({
-            id: Date.now(),
+            id: data.id || Date.now(),
             type: "private",
-            content: `From User ${data.fromUserId}: ${data.message}`,
-            timestamp: new Date(data.timestamp).toLocaleTimeString(),
+            fromUserId: data.fromUserId,
+            toUserId: data.toUserId,
+            content: data.content || data.message,
+            timestamp: data.createdAt || data.timestamp || new Date().toISOString(),
         });
+    });
+
+    socket.on("channel:message", (data) => {
+        if (!socketState.channelMessages[data.channelId]) {
+            socketState.channelMessages[data.channelId] = [];
+        }
+        socketState.channelMessages[data.channelId].push(data);
     });
 };
 

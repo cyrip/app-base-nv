@@ -6,7 +6,24 @@
         "roles": "Roles",
         "groups": "Groups",
         "permissions": "Permissions",
-        "profile": "Profile"
+        "profile": "Profile",
+        "chat": "Chat"
+    },
+    "chat": {
+        "title": "Chat",
+        "channels": "Channels",
+        "directChannel": "Direct",
+        "newChannel": "New Channel",
+        "channelNamePlaceholder": "Channel name (optional)",
+        "createChannel": "Create Channel",
+        "creating": "Creating...",
+        "selectChannel": "Select a channel",
+        "selectPrompt": "Choose a channel to view messages",
+        "loading": "Loading...",
+        "messagePlaceholder": "Type your message (HTML supported)",
+        "send": "Send",
+        "users": "Users",
+        "noUsers": "No users found"
     },
     "actions": {
         "save": "SAVE",
@@ -22,7 +39,9 @@
         "login": "Login",
         "close": "Close",
         "getStarted": "Get Started",
-        "update": "UPDATE"
+        "update": "UPDATE",
+        "select": "Select",
+        "searchUsers": "Search users..."
     },
     "status": {
         "online": "ONLINE",

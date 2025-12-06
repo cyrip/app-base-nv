@@ -7,6 +7,8 @@ const roleRoutes = require('./routes/roles');
 const groupRoutes = require('./routes/groups');
 const permissionRoutes = require('./routes/permissions');
 const languageRoutes = require('./routes/languages');
+const messageRoutes = require('./routes/messages');
+const channelRoutes = require('./routes/channels');
 
 const app = express();
 
@@ -20,5 +22,7 @@ app.use('/roles', roleRoutes);
 app.use('/groups', groupRoutes);
 app.use('/permissions', permissionRoutes);
 app.use('/languages', languageRoutes);
+app.use('/messages', messageRoutes);
+app.use('/channels', channelRoutes);
 
 module.exports = app;

@@ -46,6 +46,7 @@ onUnmounted(() => {
       <div class="flex gap-6 text-sm font-medium text-gray-300" v-if="$route.name !== 'login'">
         <router-link to="/" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.home') }}</router-link>
         <router-link to="/users" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.users') }}</router-link>
+        <router-link to="/chat" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.chat') }}</router-link>
         <router-link to="/profile" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.profile') }}</router-link>
         <router-link 
           v-if="authStore.user?.Roles?.some(r => r.name === 'admin')" 

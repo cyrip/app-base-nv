@@ -6,7 +6,23 @@
         "roles": "Rollen",
         "groups": "Gruppen",
         "permissions": "Berechtigungen",
-        "profile": "Profil"
+        "profile": "Profil",
+        "chat": "Chat"
+    },
+    "chat": {
+        "title": "Chat",
+        "channels": "Kanäle",
+        "directChannel": "Direkt",
+        "newChannel": "Neuer Kanal",
+        "channelNamePlaceholder": "Kanalname (optional)",
+        "createChannel": "Kanal erstellen",
+        "creating": "Wird erstellt...",
+        "selectChannel": "Kanal auswählen",
+        "selectPrompt": "Wählen Sie einen Kanal aus, um Nachrichten zu sehen",
+        "loading": "Laden...",
+        "messagePlaceholder": "Nachricht eingeben (HTML unterstützt)",
+        "send": "Senden",
+        "users": "Benutzer"
     },
     "actions": {
         "save": "SPEICHERN",
@@ -22,7 +38,9 @@
         "login": "Anmelden",
         "close": "Schließen",
         "getStarted": "Loslegen",
-        "update": "AKTUALISIEREN"
+        "update": "AKTUALISIEREN",
+        "select": "Auswählen",
+        "searchUsers": "Benutzer suchen..."
     },
     "status": {
         "online": "ONLINE",

@@ -6,7 +6,23 @@
         "roles": "Szerepkörök",
         "groups": "Csoportok",
         "permissions": "Jogosultságok",
-        "profile": "Profil"
+        "profile": "Profil",
+        "chat": "Chat"
+    },
+    "chat": {
+        "title": "Chat",
+        "channels": "Csatornák",
+        "directChannel": "Közvetlen",
+        "newChannel": "Új csatorna",
+        "channelNamePlaceholder": "Csatornanév (opcionális)",
+        "createChannel": "Csatorna létrehozása",
+        "creating": "Létrehozás...",
+        "selectChannel": "Válasszon csatornát",
+        "selectPrompt": "Válasszon csatornát az üzenetekhez",
+        "loading": "Betöltés...",
+        "messagePlaceholder": "Írja ide üzenetét (HTML támogatott)",
+        "send": "Küldés",
+        "users": "Felhasználók"
     },
     "actions": {
         "save": "MENTÉS",
@@ -22,7 +38,9 @@
         "login": "Bejelentkezés",
         "close": "Bezárás",
         "getStarted": "Kezdd el",
-        "update": "FRISSÍTÉS"
+        "update": "FRISSÍTÉS",
+        "select": "Válasszon",
+        "searchUsers": "Felhasználók keresése..."
     },
     "status": {
         "online": "ONLINE",

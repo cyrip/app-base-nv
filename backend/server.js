@@ -22,6 +22,9 @@ const startServer = async () => {
         // Ensure languageId column exists
         const ensureLanguageColumn = require('./src/migrations/addLanguageColumn');
         await ensureLanguageColumn();
+        // Ensure message schema
+        const ensureMessageSchema = require('./src/migrations/ensureMessageSchema');
+        await ensureMessageSchema();
 
         // Run seeders
         await seedLanguages();

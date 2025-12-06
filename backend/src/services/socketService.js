@@ -1,5 +1,7 @@
 const socketIo = require('socket.io');
 const jwt = require('jsonwebtoken');
+const messageService = require('./messageService');
+const chatService = require('./chatService');
 
 let io;
 const userSockets = new Map(); // Map<userId, socketId>
@@ -27,7 +29,7 @@ const init = (server) => {
         });
     });
 
-    io.on('connection', (socket) => {
+    io.on('connection', async (socket) => {
         console.log(`User connected: ${socket.userId}`);
         userSockets.set(socket.userId, socket.id);
 
@@ -38,6 +40,14 @@ const init = (server) => {
         const onlineUsers = Array.from(userSockets.keys());
         socket.emit('online-users', onlineUsers);
 
+        // Join channel rooms
+        try {
+            const channelIds = await chatService.listChannelIdsForUser(socket.userId);
+            channelIds.forEach(id => socket.join(`channel-${id}`));
+        } catch (error) {
+            console.error('Failed to join channel rooms', error);
+        }
+
         socket.on('disconnect', () => {
             console.log(`User disconnected: ${socket.userId}`);
             userSockets.delete(socket.userId);
@@ -46,21 +56,26 @@ const init = (server) => {
         });
 
         // Handle private messages
-        socket.on('private-message', ({ toUserId, message }) => {
+        socket.on('private-message', async ({ toUserId, message }) => {
             const fromUserId = socket.userId;
             const toSocketId = userSockets.get(toUserId);
 
+            const saved = await messageService.sendMessage(fromUserId, toUserId, message);
+
             if (toSocketId) {
-                io.to(toSocketId).emit('private-message', {
-                    fromUserId,
-                    message,
-                    timestamp: new Date()
-                });
-                // Confirm sent
-                socket.emit('private-message-sent', { toUserId, success: true });
-            } else {
-                // User not found or offline
-                socket.emit('private-message-sent', { toUserId, success: false, error: 'User offline or not found' });
+                io.to(toSocketId).emit('private-message', saved);
+            }
+            socket.emit('private-message', saved);
+            socket.emit('private-message-sent', { toUserId, success: true });
+        });
+
+        socket.on('channel:message', async ({ channelId, content }) => {
+            try {
+                const msg = await chatService.sendMessage(channelId, socket.userId, content);
+                socket.join(`channel-${channelId}`);
+                broadcastToChannel(channelId, 'channel:message', msg);
+            } catch (error) {
+                socket.emit('channel:error', { channelId, error: error.message });
             }
         });
     });
@@ -83,8 +98,17 @@ const broadcast = (event, data) => {
     return false;
 };
 
+const broadcastToChannel = (channelId, event, data) => {
+    if (io) {
+        io.to(`channel-${channelId}`).emit(event, data);
+        return true;
+    }
+    return false;
+};
+
 module.exports = {
     init,
     sendToUser,
-    broadcast
+    broadcast,
+    broadcastToChannel
 };

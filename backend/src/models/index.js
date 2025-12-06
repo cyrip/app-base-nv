@@ -4,6 +4,9 @@ const Role = require('./Role');
 const Group = require('./Group');
 const Permission = require('./Permission');
 const Language = require('./Language');
+const Message = require('./Message');
+const Channel = require('./Channel');
+const ChannelParticipant = require('./ChannelParticipant');
 
 // Define Associations
 
@@ -23,11 +26,30 @@ Permission.belongsToMany(Role, { through: 'RolePermissions' });
 Language.hasMany(User, { foreignKey: 'languageId' });
 User.belongsTo(Language, { foreignKey: 'languageId', as: 'Language' });
 
+// Messages
+User.hasMany(Message, { foreignKey: 'fromUserId', as: 'SentMessages' });
+User.hasMany(Message, { foreignKey: 'toUserId', as: 'ReceivedMessages' });
+Message.belongsTo(User, { foreignKey: 'fromUserId', as: 'FromUser' });
+Message.belongsTo(User, { foreignKey: 'toUserId', as: 'ToUser' });
+
+// Channels
+Channel.belongsToMany(User, { through: ChannelParticipant, foreignKey: 'channelId', otherKey: 'userId' });
+User.belongsToMany(Channel, { through: ChannelParticipant, foreignKey: 'userId', otherKey: 'channelId' });
+Channel.hasMany(ChannelParticipant, { foreignKey: 'channelId' });
+ChannelParticipant.belongsTo(Channel, { foreignKey: 'channelId' });
+User.hasMany(ChannelParticipant, { foreignKey: 'userId' });
+ChannelParticipant.belongsTo(User, { foreignKey: 'userId' });
+Channel.hasMany(Message, { foreignKey: 'channelId' });
+Message.belongsTo(Channel, { foreignKey: 'channelId' });
+
 module.exports = {
     sequelize,
     User,
     Role,
     Group,
     Permission,
-    Language
+    Language,
+    Message,
+    Channel,
+    ChannelParticipant
 };
