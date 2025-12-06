@@ -22,7 +22,9 @@
         "loading": "Betöltés...",
         "messagePlaceholder": "Írja ide üzenetét (HTML támogatott)",
         "send": "Küldés",
-        "users": "Felhasználók"
+        "users": "Felhasználók",
+        "noUsers": "Nincs felhasználó",
+        "startChat": "Chat indítása"
     },
     "actions": {
         "save": "MENTÉS",

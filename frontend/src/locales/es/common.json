@@ -22,7 +22,9 @@
         "loading": "Cargando...",
         "messagePlaceholder": "Escriba su mensaje (HTML permitido)",
         "send": "Enviar",
-        "users": "Usuarios"
+        "users": "Usuarios",
+        "noUsers": "No se encontraron usuarios",
+        "startChat": "Iniciar chat"
     },
     "actions": {
         "save": "GUARDAR",

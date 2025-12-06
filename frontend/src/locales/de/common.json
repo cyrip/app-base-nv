@@ -22,7 +22,9 @@
         "loading": "Laden...",
         "messagePlaceholder": "Nachricht eingeben (HTML unterstützt)",
         "send": "Senden",
-        "users": "Benutzer"
+        "users": "Benutzer",
+        "noUsers": "Keine Benutzer gefunden",
+        "startChat": "Chat starten"
     },
     "actions": {
         "save": "SPEICHERN",

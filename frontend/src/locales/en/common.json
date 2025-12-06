@@ -23,7 +23,8 @@
         "messagePlaceholder": "Type your message (HTML supported)",
         "send": "Send",
         "users": "Users",
-        "noUsers": "No users found"
+        "noUsers": "No users found",
+        "startChat": "Start chat"
     },
     "actions": {
         "save": "SAVE",
