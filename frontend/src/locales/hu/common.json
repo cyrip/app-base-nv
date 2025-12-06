@@ -1,0 +1,29 @@
+{
+    "app": {
+        "title": "ÜGYNÖKAPP",
+        "home": "Kezdőlap",
+        "users": "Felhasználók",
+        "roles": "Szerepkörök",
+        "groups": "Csoportok",
+        "permissions": "Jogosultságok"
+    },
+    "actions": {
+        "save": "MENTÉS",
+        "cancel": "MÉGSE",
+        "delete": "TÖRLÉS",
+        "edit": "SZERKESZTÉS",
+        "create": "LÉTREHOZÁS",
+        "search": "Keresés",
+        "send": "KÜLDÉS",
+        "message": "ÜZENET",
+        "connect": "CSATLAKOZÁS",
+        "logout": "KIJELENTKEZÉS",
+        "login": "Bejelentkezés"
+    },
+    "status": {
+        "online": "ONLINE",
+        "offline": "OFFLINE",
+        "connected": "CSATLAKOZVA",
+        "disconnected": "SZÉTKAPCSOLVA"
+    }
+}

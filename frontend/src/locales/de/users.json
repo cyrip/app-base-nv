@@ -1,0 +1,24 @@
+{
+    "title": "BENUTZERVERWALTUNG",
+    "table": {
+        "id": "ID",
+        "email": "E-Mail",
+        "roles": "Rollen",
+        "actions": "Aktionen"
+    },
+    "noUsers": "Keine Agenten im System gefunden.",
+    "message": {
+        "title": "Nachricht an {email}",
+        "placeholder": "Geben Sie Ihre Nachricht ein..."
+    },
+    "roles": {
+        "manage": "Rollen verwalten für {email}",
+        "button": "ROLLEN",
+        "noRoles": "Keine Rollen"
+    },
+    "groups": {
+        "manage": "Gruppen verwalten für {email}",
+        "button": "GRUPPEN",
+        "noGroups": "Keine Gruppen"
+    }
+}

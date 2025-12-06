@@ -8,8 +8,14 @@ const users = ref([])
 const authStore = useAuthStore()
 const error = ref('')
 const showMessageModal = ref(false)
+const showRoleModal = ref(false)
+const showGroupModal = ref(false)
 const selectedUser = ref(null)
 const messageText = ref('')
+const roles = ref([])
+const groups = ref([])
+const selectedRoles = ref([])
+const selectedGroups = ref([])
 
 const openMessageModal = (user) => {
   selectedUser.value = user
@@ -30,7 +36,109 @@ const sendMessage = () => {
   closeMessageModal()
 }
 
-onMounted(async () => {
+const openRoleModal = async (user) => {
+  selectedUser.value = user
+  selectedRoles.value = user.Roles?.map(r => r.id) || []
+  showRoleModal.value = true
+}
+
+const closeRoleModal = () => {
+  showRoleModal.value = false
+  selectedUser.value = null
+  selectedRoles.value = []
+}
+
+const openGroupModal = async (user) => {
+  selectedUser.value = user
+  selectedGroups.value = user.Groups?.map(g => g.id) || []
+  showGroupModal.value = true
+}
+
+const closeGroupModal = () => {
+  showGroupModal.value = false
+  selectedUser.value = null
+  selectedGroups.value = []
+}
+
+const fetchRoles = async () => {
+  try {
+    const response = await axios.get('http://localhost:3000/roles', {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    roles.value = response.data
+  } catch (e) {
+    console.error('Failed to fetch roles:', e)
+  }
+}
+
+const fetchGroups = async () => {
+  try {
+    const response = await axios.get('http://localhost:3000/groups', {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    groups.value = response.data
+  } catch (e) {
+    console.error('Failed to fetch groups:', e)
+  }
+}
+
+const saveUserRoles = async () => {
+  try {
+    const currentRoleIds = selectedUser.value.Roles?.map(r => r.id) || []
+    const rolesToAdd = selectedRoles.value.filter(id => !currentRoleIds.includes(id))
+    const rolesToRemove = currentRoleIds.filter(id => !selectedRoles.value.includes(id))
+
+    for (const roleId of rolesToAdd) {
+      await axios.post(
+        `http://localhost:3000/users/${selectedUser.value.id}/roles`,
+        { roleId },
+        { headers: { Authorization: `Bearer ${authStore.token}` } }
+      )
+    }
+
+    for (const roleId of rolesToRemove) {
+      await axios.delete(
+        `http://localhost:3000/users/${selectedUser.value.id}/roles/${roleId}`,
+        { headers: { Authorization: `Bearer ${authStore.token}` } }
+      )
+    }
+
+    await fetchUsers()
+    closeRoleModal()
+  } catch (e) {
+    error.value = 'Failed to update roles: ' + e.message
+  }
+}
+
+const saveUserGroups = async () => {
+  try {
+    const currentGroupIds = selectedUser.value.Groups?.map(g => g.id) || []
+    const groupsToAdd = selectedGroups.value.filter(id => !currentGroupIds.includes(id))
+    const groupsToRemove = currentGroupIds.filter(id => !selectedGroups.value.includes(id))
+
+    for (const groupId of groupsToAdd) {
+      await axios.post(
+        `http://localhost:3000/users/${selectedUser.value.id}/groups`,
+        { groupId },
+        { headers: { Authorization: `Bearer ${authStore.token}` } }
+      )
+    }
+
+    for (const groupId of groupsToRemove) {
+      await axios.delete(
+        `http://localhost:3000/users/${selectedUser.value.id}/groups/${groupId}`,
+        { headers: { Authorization: `Bearer ${authStore.token}` } }
+      )
+    }
+
+    await fetchUsers()
+    closeGroupModal()
+  } catch (e) {
+    error.value = 'Failed to update groups: ' + e.message
+  }
+}
+
+const fetchUsers = async () => {
   try {
     const response = await axios.get('http://localhost:3000/users', {
       headers: { Authorization: `Bearer ${authStore.token}` }
@@ -39,6 +147,12 @@ onMounted(async () => {
   } catch (e) {
     error.value = 'Failed to fetch users: ' + e.message
   }
+}
+
+onMounted(async () => {
+  await fetchUsers()
+  await fetchRoles()
+  await fetchGroups()
 })
 </script>
 
@@ -91,13 +205,20 @@ onMounted(async () => {
                 >
                   MESSAGE
                 </button>
-                <router-link
-                  to="/roles"
+                <button
+                  @click="openRoleModal(user)"
                   class="px-3 py-1 text-xs font-bold text-neon-purple border border-neon-purple/30 rounded hover:bg-neon-purple/10 transition-colors"
                   v-if="authStore.user?.Roles?.some(r => r.name === 'admin')"
                 >
-                  MANAGE ROLES
-                </router-link>
+                  ROLES
+                </button>
+                <button
+                  @click="openGroupModal(user)"
+                  class="px-3 py-1 text-xs font-bold text-neon-blue border border-neon-blue/30 rounded hover:bg-neon-blue/10 transition-colors"
+                  v-if="authStore.user?.Roles?.some(r => r.name === 'admin')"
+                >
+                  GROUPS
+                </button>
                 <div v-if="socketState.onlineUsers.has(user.id)" class="inline-flex items-center gap-2">
                   <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
                   <span class="text-xs text-green-400">ONLINE</span>
@@ -138,6 +259,88 @@ onMounted(async () => {
               class="px-6 py-2 text-sm font-bold text-deep-space bg-neon-blue rounded-lg hover:bg-white hover:shadow-[0_0_20px_rgba(0,243,255,0.5)] transition-all duration-300"
             >
               SEND
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role Management Modal -->
+    <div v-if="showRoleModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div class="w-full max-w-md bg-[#0a0a1f] border border-neon-purple/30 rounded-xl shadow-[0_0_50px_rgba(168,85,247,0.1)] overflow-hidden">
+        <div class="p-6">
+          <h3 class="text-xl font-bold text-white mb-4">Manage Roles for {{ selectedUser?.email }}</h3>
+          <div class="space-y-2 max-h-96 overflow-y-auto">
+            <label
+              v-for="role in roles"
+              :key="role.id"
+              class="flex items-center gap-3 p-3 rounded hover:bg-white/5 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                :value="role.id"
+                v-model="selectedRoles"
+                class="w-4 h-4 rounded border-white/10 bg-white/5 text-neon-purple focus:ring-neon-purple"
+              />
+              <div class="flex-1">
+                <div class="text-sm font-medium text-white">{{ role.name }}</div>
+                <div class="text-xs text-gray-400">{{ role.description }}</div>
+              </div>
+            </label>
+          </div>
+          <div class="flex justify-end gap-3 mt-6">
+            <button 
+              @click="closeRoleModal"
+              class="px-4 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors"
+            >
+              CANCEL
+            </button>
+            <button 
+              @click="saveUserRoles"
+              class="px-6 py-2 text-sm font-bold text-deep-space bg-neon-purple rounded-lg hover:bg-white hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all duration-300"
+            >
+              SAVE
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Group Management Modal -->
+    <div v-if="showGroupModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div class="w-full max-w-md bg-[#0a0a1f] border border-neon-blue/30 rounded-xl shadow-[0_0_50px_rgba(0,243,255,0.1)] overflow-hidden">
+        <div class="p-6">
+          <h3 class="text-xl font-bold text-white mb-4">Manage Groups for {{ selectedUser?.email }}</h3>
+          <div class="space-y-2 max-h-96 overflow-y-auto">
+            <label
+              v-for="group in groups"
+              :key="group.id"
+              class="flex items-center gap-3 p-3 rounded hover:bg-white/5 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                :value="group.id"
+                v-model="selectedGroups"
+                class="w-4 h-4 rounded border-white/10 bg-white/5 text-neon-blue focus:ring-neon-blue"
+              />
+              <div class="flex-1">
+                <div class="text-sm font-medium text-white">{{ group.name }}</div>
+                <div class="text-xs text-gray-400">{{ group.description }}</div>
+              </div>
+            </label>
+          </div>
+          <div class="flex justify-end gap-3 mt-6">
+            <button 
+              @click="closeGroupModal"
+              class="px-4 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors"
+            >
+              CANCEL
+            </button>
+            <button 
+              @click="saveUserGroups"
+              class="px-6 py-2 text-sm font-bold text-deep-space bg-neon-blue rounded-lg hover:bg-white hover:shadow-[0_0_20px_rgba(0,243,255,0.5)] transition-all duration-300"
+            >
+              SAVE
             </button>
           </div>
         </div>

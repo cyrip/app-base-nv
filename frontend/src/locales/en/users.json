@@ -1,0 +1,24 @@
+{
+    "title": "USER MANAGEMENT",
+    "table": {
+        "id": "ID",
+        "email": "Email",
+        "roles": "Roles",
+        "actions": "Actions"
+    },
+    "noUsers": "No agents found in the system.",
+    "message": {
+        "title": "Message to {email}",
+        "placeholder": "Type your message..."
+    },
+    "roles": {
+        "manage": "Manage Roles for {email}",
+        "button": "ROLES",
+        "noRoles": "No roles"
+    },
+    "groups": {
+        "manage": "Manage Groups for {email}",
+        "button": "GROUPS",
+        "noGroups": "No groups"
+    }
+}

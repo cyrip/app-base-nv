@@ -1,0 +1,60 @@
+{
+    "roles": {
+        "title": "ROLE MANAGEMENT",
+        "create": "CREATE ROLE",
+        "createModal": {
+            "title": "Create New Role",
+            "name": "Role Name",
+            "namePlaceholder": "e.g., moderator",
+            "description": "Description",
+            "descriptionPlaceholder": "Role description..."
+        },
+        "permissions": {
+            "title": "Manage Permissions for {name}",
+            "button": "PERMISSIONS",
+            "noPermissions": "No permissions assigned"
+        },
+        "noDescription": "No description",
+        "deleteConfirm": "Delete role \"{name}\"?"
+    },
+    "groups": {
+        "title": "GROUP MANAGEMENT",
+        "create": "CREATE GROUP",
+        "createModal": {
+            "title": "Create New Group",
+            "name": "Group Name",
+            "namePlaceholder": "e.g., Engineering",
+            "description": "Description",
+            "descriptionPlaceholder": "Group description..."
+        },
+        "noGroups": "No groups created yet",
+        "deleteConfirm": "Delete group \"{name}\"?"
+    },
+    "permissions": {
+        "title": "PERMISSION MANAGEMENT",
+        "create": "CREATE PERMISSION",
+        "createModal": {
+            "title": "Create New Permission",
+            "name": "Permission Name",
+            "namePlaceholder": "e.g., post.create",
+            "nameHint": "Use dot notation: resource.action (e.g., user.edit, post.delete)",
+            "description": "Description",
+            "descriptionPlaceholder": "Permission description..."
+        },
+        "filter": {
+            "search": "Search permissions...",
+            "allGroups": "All Groups ({count})",
+            "groupCount": "{group} ({count})"
+        },
+        "info": {
+            "title": "About Permissions",
+            "line1": "• Permissions define specific actions users can perform in the system",
+            "line2": "• Permissions are grouped by resource (e.g., user.*, role.*, group.*)",
+            "line3": "• Use dot notation for permission names (e.g., user.create, post.delete)",
+            "line4": "• Use the Roles page to assign permissions to specific roles"
+        },
+        "noPermissions": "No permissions found. Create your first permission above.",
+        "noResults": "No permissions match your filters.",
+        "count": "{count} permission | {count} permissions"
+    }
+}

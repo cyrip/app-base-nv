@@ -1,0 +1,24 @@
+{
+    "title": "FELHASZNÁLÓKEZELÉS",
+    "table": {
+        "id": "ID",
+        "email": "E-mail",
+        "roles": "Szerepkörök",
+        "actions": "Műveletek"
+    },
+    "noUsers": "Nincsenek ügynökök a rendszerben.",
+    "message": {
+        "title": "Üzenet neki: {email}",
+        "placeholder": "Írja be az üzenetét..."
+    },
+    "roles": {
+        "manage": "Szerepkörök kezelése: {email}",
+        "button": "SZEREPKÖRÖK",
+        "noRoles": "Nincsenek szerepkörök"
+    },
+    "groups": {
+        "manage": "Csoportok kezelése: {email}",
+        "button": "CSOPORTOK",
+        "noGroups": "Nincsenek csoportok"
+    }
+}

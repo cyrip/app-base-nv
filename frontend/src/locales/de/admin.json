@@ -1,0 +1,60 @@
+{
+    "roles": {
+        "title": "ROLLENVERWALTUNG",
+        "create": "ROLLE ERSTELLEN",
+        "createModal": {
+            "title": "Neue Rolle erstellen",
+            "name": "Rollenname",
+            "namePlaceholder": "z.B. Moderator",
+            "description": "Beschreibung",
+            "descriptionPlaceholder": "Rollenbeschreibung..."
+        },
+        "permissions": {
+            "title": "Berechtigungen verwalten für {name}",
+            "button": "BERECHTIGUNGEN",
+            "noPermissions": "Keine Berechtigungen zugewiesen"
+        },
+        "noDescription": "Keine Beschreibung",
+        "deleteConfirm": "Rolle \"{name}\" löschen?"
+    },
+    "groups": {
+        "title": "GRUPPENVERWALTUNG",
+        "create": "GRUPPE ERSTELLEN",
+        "createModal": {
+            "title": "Neue Gruppe erstellen",
+            "name": "Gruppenname",
+            "namePlaceholder": "z.B. Entwicklung",
+            "description": "Beschreibung",
+            "descriptionPlaceholder": "Gruppenbeschreibung..."
+        },
+        "noGroups": "Noch keine Gruppen erstellt",
+        "deleteConfirm": "Gruppe \"{name}\" löschen?"
+    },
+    "permissions": {
+        "title": "BERECHTIGUNGSVERWALTUNG",
+        "create": "BERECHTIGUNG ERSTELLEN",
+        "createModal": {
+            "title": "Neue Berechtigung erstellen",
+            "name": "Berechtigungsname",
+            "namePlaceholder": "z.B. post.create",
+            "nameHint": "Verwenden Sie Punktnotation: ressource.aktion (z.B. user.edit, post.delete)",
+            "description": "Beschreibung",
+            "descriptionPlaceholder": "Berechtigungsbeschreibung..."
+        },
+        "filter": {
+            "search": "Berechtigungen suchen...",
+            "allGroups": "Alle Gruppen ({count})",
+            "groupCount": "{group} ({count})"
+        },
+        "info": {
+            "title": "Über Berechtigungen",
+            "line1": "• Berechtigungen definieren spezifische Aktionen, die Benutzer im System ausführen können",
+            "line2": "• Berechtigungen sind nach Ressourcen gruppiert (z.B. user.*, role.*, group.*)",
+            "line3": "• Verwenden Sie Punktnotation für Berechtigungsnamen (z.B. user.create, post.delete)",
+            "line4": "• Verwenden Sie die Rollenseite, um Berechtigungen bestimmten Rollen zuzuweisen"
+        },
+        "noPermissions": "Keine Berechtigungen gefunden. Erstellen Sie Ihre erste Berechtigung oben.",
+        "noResults": "Keine Berechtigungen entsprechen Ihren Filtern.",
+        "count": "{count} Berechtigung | {count} Berechtigungen"
+    }
+}

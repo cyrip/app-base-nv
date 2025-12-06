@@ -4,10 +4,13 @@ import { onMounted, onUnmounted } from 'vue';
 import { initSocket, disconnectSocket, socketState } from './services/socket';
 import SocketStatus from './components/SocketStatus.vue';
 import ToastContainer from './components/ToastContainer.vue';
+import LanguageSwitcher from './components/LanguageSwitcher.vue';
 import { useAuthStore } from './modules/auth/stores/auth';
+import { useI18n } from 'vue-i18n';
 
 const authStore = useAuthStore();
 const router = useRouter();
+const { t } = useI18n();
 
 const handleLogout = () => {
   authStore.logout();
@@ -37,57 +40,58 @@ onUnmounted(() => {
     <!-- Navbar -->
     <nav class="relative z-50 flex items-center justify-between px-8 py-6 backdrop-blur-md bg-white/5 border-b border-white/10">
       <div class="text-2xl font-bold tracking-tighter">
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-blue to-neon-purple">AGENT</span>
-        <span class="text-white">APP</span>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-blue to-neon-purple">{{ t('common.app.title').substring(0, 5) }}</span>
+        <span class="text-white">{{ t('common.app.title').substring(5) }}</span>
       </div>
       <div class="flex gap-6 text-sm font-medium text-gray-300" v-if="$route.name !== 'login'">
-        <router-link to="/" class="hover:text-neon-blue transition-colors duration-300">Home</router-link>
-        <router-link to="/users" class="hover:text-neon-blue transition-colors duration-300">Users</router-link>
+        <router-link to="/" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.home') }}</router-link>
+        <router-link to="/users" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.users') }}</router-link>
         <router-link 
           v-if="authStore.user?.Roles?.some(r => r.name === 'admin')" 
           to="/roles" 
           class="hover:text-neon-purple transition-colors duration-300"
         >
-          Roles
+          {{ t('common.app.roles') }}
         </router-link>
         <router-link 
           v-if="authStore.user?.Roles?.some(r => r.name === 'admin')" 
           to="/groups" 
           class="hover:text-neon-purple transition-colors duration-300"
         >
-          Groups
+          {{ t('common.app.groups') }}
         </router-link>
         <router-link 
           v-if="authStore.user?.Roles?.some(r => r.name === 'admin')" 
           to="/permissions" 
           class="hover:text-neon-blue transition-colors duration-300"
         >
-          Permissions
+          {{ t('common.app.permissions') }}
         </router-link>
       </div>
       <div v-if="$route.name !== 'login'" class="flex items-center gap-4">
+         <LanguageSwitcher />
          <div v-if="authStore.user" class="flex items-center gap-4">
             <div class="flex flex-col items-end">
               <span class="text-xs font-bold text-gray-400">{{ authStore.user.email }}</span>
               <span class="text-[10px] text-gray-500" v-if="authStore.user.Roles">
-                Roles: {{ authStore.user.Roles.map(r => r.name).join(', ') }}
+                {{ t('auth.user.roles') }}: {{ authStore.user.Roles.map(r => r.name).join(', ') }}
               </span>
               <span class="text-[10px] text-red-500" v-else>
-                No roles loaded - please logout and login again
+                {{ t('auth.user.noRoles') }}
               </span>
               <div class="flex items-center gap-1.5">
                  <div class="w-1.5 h-1.5 rounded-full" :class="socketState.connected ? 'bg-neon-blue animate-pulse' : 'bg-red-500'"></div>
                  <span class="text-[10px] font-bold tracking-wider" :class="socketState.connected ? 'text-neon-blue' : 'text-red-500'">
-                    {{ socketState.connected ? 'CONNECTED' : 'DISCONNECTED' }}
+                    {{ socketState.connected ? t('common.status.connected') : t('common.status.disconnected') }}
                  </span>
               </div>
             </div>
             <button @click="handleLogout" class="px-4 py-1.5 text-xs font-bold text-red-400 border border-red-400/30 rounded-full hover:bg-red-400/10 transition-all duration-300">
-              LOGOUT
+              {{ t('common.actions.logout') }}
             </button>
          </div>
          <button v-else class="px-6 py-2 text-sm font-bold text-deep-space bg-neon-blue rounded-full hover:bg-white hover:shadow-[0_0_20px_rgba(0,243,255,0.5)] transition-all duration-300">
-          CONNECT
+          {{ t('common.actions.connect') }}
         </button>
       </div>
     </nav>

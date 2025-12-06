@@ -1,0 +1,60 @@
+{
+    "roles": {
+        "title": "SZEREPKÖRKEZELÉS",
+        "create": "SZEREPKÖR LÉTREHOZÁSA",
+        "createModal": {
+            "title": "Új szerepkör létrehozása",
+            "name": "Szerepkör neve",
+            "namePlaceholder": "pl. moderátor",
+            "description": "Leírás",
+            "descriptionPlaceholder": "Szerepkör leírása..."
+        },
+        "permissions": {
+            "title": "Jogosultságok kezelése: {name}",
+            "button": "JOGOSULTSÁGOK",
+            "noPermissions": "Nincsenek hozzárendelt jogosultságok"
+        },
+        "noDescription": "Nincs leírás",
+        "deleteConfirm": "Törli a(z) \"{name}\" szerepkört?"
+    },
+    "groups": {
+        "title": "CSOPORTKEZELÉS",
+        "create": "CSOPORT LÉTREHOZÁSA",
+        "createModal": {
+            "title": "Új csoport létrehozása",
+            "name": "Csoport neve",
+            "namePlaceholder": "pl. Mérnökség",
+            "description": "Leírás",
+            "descriptionPlaceholder": "Csoport leírása..."
+        },
+        "noGroups": "Még nincsenek csoportok létrehozva",
+        "deleteConfirm": "Törli a(z) \"{name}\" csoportot?"
+    },
+    "permissions": {
+        "title": "JOGOSULTSÁGKEZELÉS",
+        "create": "JOGOSULTSÁG LÉTREHOZÁSA",
+        "createModal": {
+            "title": "Új jogosultság létrehozása",
+            "name": "Jogosultság neve",
+            "namePlaceholder": "pl. post.create",
+            "nameHint": "Használjon pont jelölést: erőforrás.művelet (pl. user.edit, post.delete)",
+            "description": "Leírás",
+            "descriptionPlaceholder": "Jogosultság leírása..."
+        },
+        "filter": {
+            "search": "Jogosultságok keresése...",
+            "allGroups": "Összes csoport ({count})",
+            "groupCount": "{group} ({count})"
+        },
+        "info": {
+            "title": "A jogosultságokról",
+            "line1": "• A jogosultságok meghatározzák, hogy a felhasználók milyen műveleteket hajthatnak végre a rendszerben",
+            "line2": "• A jogosultságok erőforrás szerint vannak csoportosítva (pl. user.*, role.*, group.*)",
+            "line3": "• Használjon pont jelölést a jogosultságok neveiben (pl. user.create, post.delete)",
+            "line4": "• Használja a Szerepkörök oldalt a jogosultságok szerepkörökhöz rendeléséhez"
+        },
+        "noPermissions": "Nincsenek jogosultságok. Hozza létre az első jogosultságot fent.",
+        "noResults": "Nincs a szűrőknek megfelelő jogosultság.",
+        "count": "{count} jogosultság"
+    }
+}

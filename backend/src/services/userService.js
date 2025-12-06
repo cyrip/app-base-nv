@@ -8,6 +8,10 @@ class UserService {
                 model: Role,
                 through: { attributes: [] },
                 attributes: ['id', 'name']
+            }, {
+                model: Group,
+                through: { attributes: [] },
+                attributes: ['id', 'name', 'description']
             }]
         });
     }

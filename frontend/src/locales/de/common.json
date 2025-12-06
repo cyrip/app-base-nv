@@ -1,0 +1,29 @@
+{
+    "app": {
+        "title": "AGENTENAPP",
+        "home": "Startseite",
+        "users": "Benutzer",
+        "roles": "Rollen",
+        "groups": "Gruppen",
+        "permissions": "Berechtigungen"
+    },
+    "actions": {
+        "save": "SPEICHERN",
+        "cancel": "ABBRECHEN",
+        "delete": "LÖSCHEN",
+        "edit": "BEARBEITEN",
+        "create": "ERSTELLEN",
+        "search": "Suchen",
+        "send": "SENDEN",
+        "message": "NACHRICHT",
+        "connect": "VERBINDEN",
+        "logout": "ABMELDEN",
+        "login": "Anmelden"
+    },
+    "status": {
+        "online": "ONLINE",
+        "offline": "OFFLINE",
+        "connected": "VERBUNDEN",
+        "disconnected": "GETRENNT"
+    }
+}

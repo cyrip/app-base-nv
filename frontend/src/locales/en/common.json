@@ -1,0 +1,29 @@
+{
+    "app": {
+        "title": "AGENTAPP",
+        "home": "Home",
+        "users": "Users",
+        "roles": "Roles",
+        "groups": "Groups",
+        "permissions": "Permissions"
+    },
+    "actions": {
+        "save": "SAVE",
+        "cancel": "CANCEL",
+        "delete": "DELETE",
+        "edit": "EDIT",
+        "create": "CREATE",
+        "search": "Search",
+        "send": "SEND",
+        "message": "MESSAGE",
+        "connect": "CONNECT",
+        "logout": "LOGOUT",
+        "login": "Login"
+    },
+    "status": {
+        "online": "ONLINE",
+        "offline": "OFFLINE",
+        "connected": "CONNECTED",
+        "disconnected": "DISCONNECTED"
+    }
+}
