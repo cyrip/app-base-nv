@@ -2,11 +2,33 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../../auth/stores/auth'
-import { socketState } from '../../../services/socket'
+import { socketState, sendPrivateMessage } from '../../../services/socket'
 
 const users = ref([])
 const authStore = useAuthStore()
 const error = ref('')
+const showMessageModal = ref(false)
+const selectedUser = ref(null)
+const messageText = ref('')
+
+const openMessageModal = (user) => {
+  selectedUser.value = user
+  showMessageModal.value = true
+  messageText.value = ''
+}
+
+const closeMessageModal = () => {
+  showMessageModal.value = false
+  selectedUser.value = null
+  messageText.value = ''
+}
+
+const sendMessage = () => {
+  if (!messageText.value.trim() || !selectedUser.value) return
+  
+  sendPrivateMessage(selectedUser.value.id, messageText.value)
+  closeMessageModal()
+}
 
 onMounted(async () => {
   try {
@@ -56,13 +78,22 @@ onMounted(async () => {
               </span>
             </td>
             <td class="p-4 text-right">
-              <div v-if="socketState.onlineUsers.has(user.id)" class="inline-flex items-center gap-2">
-                <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                <span class="text-xs text-green-400">ONLINE</span>
-              </div>
-              <div v-else class="inline-flex items-center gap-2">
-                <div class="w-2 h-2 rounded-full bg-gray-500"></div>
-                <span class="text-xs text-gray-500">OFFLINE</span>
+              <div class="flex items-center justify-end gap-3">
+                <button 
+                  @click="openMessageModal(user)"
+                  class="px-3 py-1 text-xs font-bold text-neon-blue border border-neon-blue/30 rounded hover:bg-neon-blue/10 transition-colors"
+                  v-if="user.id !== authStore.user?.id"
+                >
+                  MESSAGE
+                </button>
+                <div v-if="socketState.onlineUsers.has(user.id)" class="inline-flex items-center gap-2">
+                  <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                  <span class="text-xs text-green-400">ONLINE</span>
+                </div>
+                <div v-else class="inline-flex items-center gap-2">
+                  <div class="w-2 h-2 rounded-full bg-gray-500"></div>
+                  <span class="text-xs text-gray-500">OFFLINE</span>
+                </div>
               </div>
             </td>
           </tr>
@@ -71,6 +102,34 @@ onMounted(async () => {
     </div>
     <div v-else class="text-center py-12 text-gray-500">
       No agents found in the system.
+    </div>
+
+    <!-- Message Modal -->
+    <div v-if="showMessageModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div class="w-full max-w-md bg-[#0a0a1f] border border-neon-blue/30 rounded-xl shadow-[0_0_50px_rgba(0,243,255,0.1)] overflow-hidden">
+        <div class="p-6">
+          <h3 class="text-xl font-bold text-white mb-4">Message to {{ selectedUser?.email }}</h3>
+          <textarea 
+            v-model="messageText"
+            class="w-full h-32 bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-neon-blue focus:outline-none transition-colors resize-none"
+            placeholder="Type your message..."
+          ></textarea>
+          <div class="flex justify-end gap-3 mt-6">
+            <button 
+              @click="closeMessageModal"
+              class="px-4 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors"
+            >
+              CANCEL
+            </button>
+            <button 
+              @click="sendMessage"
+              class="px-6 py-2 text-sm font-bold text-deep-space bg-neon-blue rounded-lg hover:bg-white hover:shadow-[0_0_20px_rgba(0,243,255,0.5)] transition-all duration-300"
+            >
+              SEND
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

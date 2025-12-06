@@ -44,6 +44,25 @@ const init = (server) => {
             // Broadcast user disconnected event
             io.emit('user-disconnected', { userId: socket.userId });
         });
+
+        // Handle private messages
+        socket.on('private-message', ({ toUserId, message }) => {
+            const fromUserId = socket.userId;
+            const toSocketId = userSockets.get(toUserId);
+
+            if (toSocketId) {
+                io.to(toSocketId).emit('private-message', {
+                    fromUserId,
+                    message,
+                    timestamp: new Date()
+                });
+                // Confirm sent
+                socket.emit('private-message-sent', { toUserId, success: true });
+            } else {
+                // User not found or offline
+                socket.emit('private-message-sent', { toUserId, success: false, error: 'User offline or not found' });
+            }
+        });
     });
 };
 

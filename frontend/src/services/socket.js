@@ -70,6 +70,16 @@ export const initSocket = (token) => {
     socket.on("user-disconnected", ({ userId }) => {
         socketState.onlineUsers.delete(userId);
     });
+
+    socket.on("private-message", (data) => {
+        console.log("Private message received:", data);
+        socketState.messages.unshift({
+            id: Date.now(),
+            type: "private",
+            content: `From User ${data.fromUserId}: ${data.message}`,
+            timestamp: new Date(data.timestamp).toLocaleTimeString(),
+        });
+    });
 };
 
 export const disconnectSocket = () => {
@@ -77,6 +87,12 @@ export const disconnectSocket = () => {
         socket.disconnect();
         socket = null;
         socketState.connected = false;
+    }
+};
+
+export const sendPrivateMessage = (toUserId, message) => {
+    if (socket) {
+        socket.emit('private-message', { toUserId, message });
     }
 };
 
