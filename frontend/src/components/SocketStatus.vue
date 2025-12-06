@@ -27,9 +27,18 @@
       <div
         v-for="msg in socketState.messages"
         :key="msg.id"
-        class="pointer-events-auto max-w-xs px-4 py-3 rounded-lg backdrop-blur-md bg-deep-space/80 border border-white/10 shadow-xl text-sm text-gray-200"
+        class="pointer-events-auto max-w-xs px-4 py-3 rounded-lg backdrop-blur-md bg-deep-space/80 border border-white/10 shadow-xl text-sm text-gray-200 relative group"
       >
-        <div class="flex justify-between items-start gap-2 mb-1">
+        <button 
+          @click="removeMessage(msg.id)"
+          class="absolute top-2 right-2 w-5 h-5 flex items-center justify-center rounded hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
+          aria-label="Close"
+        >
+          <svg class="w-3 h-3 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+        <div class="flex justify-between items-start gap-2 mb-1 pr-6">
           <span
             class="text-xs font-bold uppercase tracking-wider"
             :class="msg.type === 'info' ? 'text-neon-purple' : 'text-neon-blue'"
@@ -45,6 +54,25 @@
 
 <script setup>
 import { socketState } from "../services/socket";
+import { watch } from 'vue';
+
+const removeMessage = (messageId) => {
+  const index = socketState.messages.findIndex(m => m.id === messageId);
+  if (index > -1) {
+    socketState.messages.splice(index, 1);
+  }
+};
+
+// Auto-remove messages after 10 seconds
+watch(() => socketState.messages.length, () => {
+  socketState.messages.forEach(message => {
+    if (!message.timeoutId) {
+      message.timeoutId = setTimeout(() => {
+        removeMessage(message.id);
+      }, 10000); // 10 seconds
+    }
+  });
+});
 </script>
 
 <style scoped>
