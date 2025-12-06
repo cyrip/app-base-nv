@@ -18,12 +18,32 @@
         "message": "MESSAGE",
         "connect": "CONNECT",
         "logout": "LOGOUT",
-        "login": "Login"
+        "login": "Login",
+        "close": "Close",
+        "getStarted": "Get Started"
     },
     "status": {
         "online": "ONLINE",
         "offline": "OFFLINE",
         "connected": "CONNECTED",
         "disconnected": "DISCONNECTED"
+    },
+    "languages": {
+        "en": "English",
+        "hu": "Hungarian",
+        "de": "German"
+    },
+    "landing": {
+        "hero": {
+            "title": "The Future of",
+            "highlight": "AI AGENTS",
+            "subtitle": "Orchestrate autonomous agents with a next-generation interface. Built for scalability, designed for the future.",
+            "ctaPrimary": "Get Started"
+        },
+        "stats": {
+            "efficiency": "Efficiency",
+            "uptime": "Uptime",
+            "agents": "Agents"
+        }
     }
 }

@@ -4,8 +4,12 @@
         "id": "ID",
         "email": "E-mail",
         "roles": "Szerepkörök",
+        "emailIdentity": "E-mail azonosító",
+        "accessLevel": "Hozzáférési szint",
+        "status": "Állapot",
         "actions": "Műveletek"
     },
+    "activeAgents": "{count} AKTÍV ÜGYNÖK",
     "noUsers": "Nincsenek ügynökök a rendszerben.",
     "message": {
         "title": "Üzenet neki: {email}",
@@ -20,5 +24,10 @@
         "manage": "Csoportok kezelése: {email}",
         "button": "CSOPORTOK",
         "noGroups": "Nincsenek csoportok"
+    },
+    "errors": {
+        "fetchUsers": "A felhasználók lekérése sikertelen: {message}",
+        "updateRoles": "A szerepkörök frissítése sikertelen: {message}",
+        "updateGroups": "A csoportok frissítése sikertelen: {message}"
     }
 }

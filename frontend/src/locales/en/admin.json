@@ -15,7 +15,20 @@
             "noPermissions": "No permissions assigned"
         },
         "noDescription": "No description",
-        "deleteConfirm": "Delete role \"{name}\"?"
+        "deleteConfirm": "Delete role \"{name}\"?",
+        "errors": {
+            "fetch": "Failed to fetch roles",
+            "fetchPermissions": "Failed to fetch permissions",
+            "nameRequired": "Role name is required",
+            "create": "Failed to create role",
+            "assign": "Failed to assign permissions",
+            "delete": "Failed to delete role"
+        },
+        "success": {
+            "create": "Role created successfully!",
+            "assign": "Permissions updated successfully!",
+            "delete": "Role deleted successfully!"
+        }
     },
     "groups": {
         "title": "GROUP MANAGEMENT",
@@ -28,7 +41,18 @@
             "descriptionPlaceholder": "Group description..."
         },
         "noGroups": "No groups created yet",
-        "deleteConfirm": "Delete group \"{name}\"?"
+        "noDescription": "No description",
+        "deleteConfirm": "Delete group \"{name}\"?",
+        "errors": {
+            "fetch": "Failed to fetch groups",
+            "nameRequired": "Group name is required",
+            "create": "Failed to create group",
+            "delete": "Failed to delete group"
+        },
+        "success": {
+            "create": "Group created successfully!",
+            "delete": "Group deleted successfully!"
+        }
     },
     "permissions": {
         "title": "PERMISSION MANAGEMENT",
@@ -46,6 +70,7 @@
             "allGroups": "All Groups ({count})",
             "groupCount": "{group} ({count})"
         },
+        "otherGroup": "Other",
         "info": {
             "title": "About Permissions",
             "line1": "• Permissions define specific actions users can perform in the system",
@@ -55,6 +80,17 @@
         },
         "noPermissions": "No permissions found. Create your first permission above.",
         "noResults": "No permissions match your filters.",
-        "count": "{count} permission | {count} permissions"
+        "count": "{count} permission | {count} permissions",
+        "deleteConfirm": "Delete permission \"{name}\"?",
+        "errors": {
+            "fetch": "Failed to fetch permissions",
+            "nameRequired": "Permission name is required",
+            "create": "Failed to create permission",
+            "delete": "Failed to delete permission"
+        },
+        "success": {
+            "create": "Permission created successfully!",
+            "delete": "Permission deleted successfully!"
+        }
     }
 }

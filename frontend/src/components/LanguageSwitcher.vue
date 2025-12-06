@@ -1,13 +1,14 @@
 <script setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 
-const languages = [
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'hu', name: 'Magyar', flag: '🇭🇺' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' }
-];
+const languages = computed(() => [
+  { code: 'en', name: t('common.languages.en'), flag: '🇬🇧' },
+  { code: 'hu', name: t('common.languages.hu'), flag: '🇭🇺' },
+  { code: 'de', name: t('common.languages.de'), flag: '🇩🇪' }
+]);
 
 const changeLanguage = (lang) => {
   locale.value = lang;

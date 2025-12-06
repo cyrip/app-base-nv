@@ -4,8 +4,12 @@
         "id": "ID",
         "email": "Email",
         "roles": "Roles",
+        "emailIdentity": "Email Identity",
+        "accessLevel": "Access Level",
+        "status": "Status",
         "actions": "Actions"
     },
+    "activeAgents": "{count} ACTIVE AGENTS",
     "noUsers": "No agents found in the system.",
     "message": {
         "title": "Message to {email}",
@@ -20,5 +24,10 @@
         "manage": "Manage Groups for {email}",
         "button": "GROUPS",
         "noGroups": "No groups"
+    },
+    "errors": {
+        "fetchUsers": "Failed to fetch users: {message}",
+        "updateRoles": "Failed to update roles: {message}",
+        "updateGroups": "Failed to update groups: {message}"
     }
 }

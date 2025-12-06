@@ -15,7 +15,20 @@
             "noPermissions": "Nincsenek hozzárendelt jogosultságok"
         },
         "noDescription": "Nincs leírás",
-        "deleteConfirm": "Törli a(z) \"{name}\" szerepkört?"
+        "deleteConfirm": "Törli a(z) \"{name}\" szerepkört?",
+        "errors": {
+            "fetch": "A szerepkörök lekérése sikertelen",
+            "fetchPermissions": "A jogosultságok lekérése sikertelen",
+            "nameRequired": "A szerepkör neve kötelező",
+            "create": "A szerepkör létrehozása sikertelen",
+            "assign": "A jogosultságok hozzárendelése sikertelen",
+            "delete": "A szerepkör törlése sikertelen"
+        },
+        "success": {
+            "create": "Sikeres szerepkör-létrehozás!",
+            "assign": "Jogosultságok sikeresen frissítve!",
+            "delete": "Sikeres szerepkör törlés!"
+        }
     },
     "groups": {
         "title": "CSOPORTKEZELÉS",
@@ -28,7 +41,18 @@
             "descriptionPlaceholder": "Csoport leírása..."
         },
         "noGroups": "Még nincsenek csoportok létrehozva",
-        "deleteConfirm": "Törli a(z) \"{name}\" csoportot?"
+        "noDescription": "Nincs leírás",
+        "deleteConfirm": "Törli a(z) \"{name}\" csoportot?",
+        "errors": {
+            "fetch": "A csoportok lekérése sikertelen",
+            "nameRequired": "A csoport neve kötelező",
+            "create": "A csoport létrehozása sikertelen",
+            "delete": "A csoport törlése sikertelen"
+        },
+        "success": {
+            "create": "Sikeres csoportlétrehozás!",
+            "delete": "Sikeres csoport törlés!"
+        }
     },
     "permissions": {
         "title": "JOGOSULTSÁGKEZELÉS",
@@ -46,6 +70,7 @@
             "allGroups": "Összes csoport ({count})",
             "groupCount": "{group} ({count})"
         },
+        "otherGroup": "Egyéb",
         "info": {
             "title": "A jogosultságokról",
             "line1": "• A jogosultságok meghatározzák, hogy a felhasználók milyen műveleteket hajthatnak végre a rendszerben",
@@ -55,6 +80,17 @@
         },
         "noPermissions": "Nincsenek jogosultságok. Hozza létre az első jogosultságot fent.",
         "noResults": "Nincs a szűrőknek megfelelő jogosultság.",
-        "count": "{count} jogosultság"
+        "count": "{count} jogosultság",
+        "deleteConfirm": "Törli a(z) \"{name}\" jogosultságot?",
+        "errors": {
+            "fetch": "A jogosultságok lekérése sikertelen",
+            "nameRequired": "A jogosultság neve kötelező",
+            "create": "A jogosultság létrehozása sikertelen",
+            "delete": "A jogosultság törlése sikertelen"
+        },
+        "success": {
+            "create": "Jogosultság sikeresen létrehozva!",
+            "delete": "Jogosultság sikeresen törölve!"
+        }
     }
 }

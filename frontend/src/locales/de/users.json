@@ -4,8 +4,12 @@
         "id": "ID",
         "email": "E-Mail",
         "roles": "Rollen",
+        "emailIdentity": "E-Mail-Adresse",
+        "accessLevel": "Zugriffsstufe",
+        "status": "Status",
         "actions": "Aktionen"
     },
+    "activeAgents": "{count} AKTIVE AGENTEN",
     "noUsers": "Keine Agenten im System gefunden.",
     "message": {
         "title": "Nachricht an {email}",
@@ -20,5 +24,10 @@
         "manage": "Gruppen verwalten für {email}",
         "button": "GRUPPEN",
         "noGroups": "Keine Gruppen"
+    },
+    "errors": {
+        "fetchUsers": "Benutzer konnten nicht geladen werden: {message}",
+        "updateRoles": "Rollen konnten nicht aktualisiert werden: {message}",
+        "updateGroups": "Gruppen konnten nicht aktualisiert werden: {message}"
     }
 }

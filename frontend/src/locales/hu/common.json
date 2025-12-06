@@ -18,12 +18,32 @@
         "message": "ÜZENET",
         "connect": "CSATLAKOZÁS",
         "logout": "KIJELENTKEZÉS",
-        "login": "Bejelentkezés"
+        "login": "Bejelentkezés",
+        "close": "Bezárás",
+        "getStarted": "Kezdd el"
     },
     "status": {
         "online": "ONLINE",
         "offline": "OFFLINE",
         "connected": "CSATLAKOZVA",
         "disconnected": "SZÉTKAPCSOLVA"
+    },
+    "languages": {
+        "en": "Angol",
+        "hu": "Magyar",
+        "de": "Német"
+    },
+    "landing": {
+        "hero": {
+            "title": "A jövője",
+            "highlight": "MI ÜGYNÖKÖK",
+            "subtitle": "Autonóm ügynököket irányít egy új generációs felülettel. Skálázhatóságra építve, a jövőre tervezve.",
+            "ctaPrimary": "Kezdd el"
+        },
+        "stats": {
+            "efficiency": "Hatékonyság",
+            "uptime": "Üzemidő",
+            "agents": "Ügynökök"
+        }
     }
 }

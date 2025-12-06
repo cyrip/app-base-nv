@@ -15,7 +15,7 @@
         <button 
           @click="toastService.remove(toast.id)"
           class="absolute top-2 right-2 w-5 h-5 flex items-center justify-center rounded hover:bg-white/10 transition-colors"
-          aria-label="Close"
+          :aria-label="t('common.actions.close')"
         >
           <svg class="w-3 h-3 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -52,6 +52,9 @@
 
 <script setup>
 import { toastService } from '../services/toastService';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 </script>
 
 <style scoped>

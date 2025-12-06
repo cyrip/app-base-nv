@@ -15,7 +15,20 @@
             "noPermissions": "Keine Berechtigungen zugewiesen"
         },
         "noDescription": "Keine Beschreibung",
-        "deleteConfirm": "Rolle \"{name}\" löschen?"
+        "deleteConfirm": "Rolle \"{name}\" löschen?",
+        "errors": {
+            "fetch": "Rollen konnten nicht geladen werden",
+            "fetchPermissions": "Berechtigungen konnten nicht geladen werden",
+            "nameRequired": "Rollenname ist erforderlich",
+            "create": "Rolle konnte nicht erstellt werden",
+            "assign": "Berechtigungen konnten nicht zugewiesen werden",
+            "delete": "Rolle konnte nicht gelöscht werden"
+        },
+        "success": {
+            "create": "Rolle erfolgreich erstellt!",
+            "assign": "Berechtigungen erfolgreich aktualisiert!",
+            "delete": "Rolle erfolgreich gelöscht!"
+        }
     },
     "groups": {
         "title": "GRUPPENVERWALTUNG",
@@ -28,7 +41,18 @@
             "descriptionPlaceholder": "Gruppenbeschreibung..."
         },
         "noGroups": "Noch keine Gruppen erstellt",
-        "deleteConfirm": "Gruppe \"{name}\" löschen?"
+        "noDescription": "Keine Beschreibung",
+        "deleteConfirm": "Gruppe \"{name}\" löschen?",
+        "errors": {
+            "fetch": "Gruppen konnten nicht geladen werden",
+            "nameRequired": "Gruppenname ist erforderlich",
+            "create": "Gruppe konnte nicht erstellt werden",
+            "delete": "Gruppe konnte nicht gelöscht werden"
+        },
+        "success": {
+            "create": "Gruppe erfolgreich erstellt!",
+            "delete": "Gruppe erfolgreich gelöscht!"
+        }
     },
     "permissions": {
         "title": "BERECHTIGUNGSVERWALTUNG",
@@ -46,6 +70,7 @@
             "allGroups": "Alle Gruppen ({count})",
             "groupCount": "{group} ({count})"
         },
+        "otherGroup": "Andere",
         "info": {
             "title": "Über Berechtigungen",
             "line1": "• Berechtigungen definieren spezifische Aktionen, die Benutzer im System ausführen können",
@@ -55,6 +80,17 @@
         },
         "noPermissions": "Keine Berechtigungen gefunden. Erstellen Sie Ihre erste Berechtigung oben.",
         "noResults": "Keine Berechtigungen entsprechen Ihren Filtern.",
-        "count": "{count} Berechtigung | {count} Berechtigungen"
+        "count": "{count} Berechtigung | {count} Berechtigungen",
+        "deleteConfirm": "Berechtigung \"{name}\" löschen?",
+        "errors": {
+            "fetch": "Berechtigungen konnten nicht geladen werden",
+            "nameRequired": "Berechtigungsname ist erforderlich",
+            "create": "Berechtigung konnte nicht erstellt werden",
+            "delete": "Berechtigung konnte nicht gelöscht werden"
+        },
+        "success": {
+            "create": "Berechtigung erfolgreich erstellt!",
+            "delete": "Berechtigung erfolgreich gelöscht!"
+        }
     }
 }

@@ -3,9 +3,11 @@ import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '../../auth/stores/auth';
 import { useServices } from '../../../services/serviceContainer';
+import { useI18n } from 'vue-i18n';
 
 const authStore = useAuthStore();
 const { toast } = useServices();
+const { t } = useI18n();
 const permissions = ref([]);
 const loading = ref(false);
 const showCreateModal = ref(false);
@@ -21,8 +23,8 @@ const fetchPermissions = async () => {
     });
     permissions.value = response.data;
   } catch (error) {
-    console.error('Failed to fetch permissions:', error);
-    toast.error('Failed to fetch permissions');
+    console.error(t('admin.permissions.errors.fetch'), error);
+    toast.error(t('admin.permissions.errors.fetch'));
   } finally {
     loading.value = false;
   }
@@ -90,6 +92,10 @@ const groupCounts = computed(() => {
   return counts;
 });
 
+const formatGroupLabel = (group) => {
+  return group === 'other' ? t('admin.permissions.otherGroup') : group.toUpperCase();
+};
+
 const openCreateModal = () => {
   newPermission.value = { name: '', description: '' };
   showCreateModal.value = true;
@@ -102,7 +108,7 @@ const closeCreateModal = () => {
 
 const createPermission = async () => {
   if (!newPermission.value.name) {
-    toast.warning('Permission name is required');
+    toast.warning(t('admin.permissions.errors.nameRequired'));
     return;
   }
 
@@ -110,27 +116,27 @@ const createPermission = async () => {
     await axios.post('http://localhost:3000/permissions', newPermission.value, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });
-    toast.success('Permission created successfully!');
+    toast.success(t('admin.permissions.success.create'));
     await fetchPermissions();
     closeCreateModal();
   } catch (error) {
-    console.error('Failed to create permission:', error);
-    toast.error(error.response?.data?.message || 'Failed to create permission');
+    console.error(t('admin.permissions.errors.create'), error);
+    toast.error(error.response?.data?.message || t('admin.permissions.errors.create'));
   }
 };
 
 const deletePermission = async (permission) => {
-  if (!confirm(`Delete permission "${permission.name}"?`)) return;
+  if (!confirm(t('admin.permissions.deleteConfirm', { name: permission.name }))) return;
 
   try {
     await axios.delete(`http://localhost:3000/permissions/${permission.id}`, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });
-    toast.success('Permission deleted successfully!');
+    toast.success(t('admin.permissions.success.delete'));
     await fetchPermissions();
   } catch (error) {
-    console.error('Failed to delete permission:', error);
-    toast.error('Failed to delete permission');
+    console.error(t('admin.permissions.errors.delete'), error);
+    toast.error(t('admin.permissions.errors.delete'));
   }
 };
 
@@ -143,13 +149,13 @@ onMounted(() => {
   <div class="container mx-auto px-4 py-12">
     <div class="flex items-center justify-between mb-8">
       <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-purple to-neon-blue">
-        PERMISSION MANAGEMENT
+        {{ t('admin.permissions.title') }}
       </h2>
       <button
         @click="openCreateModal"
         class="px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-neon-blue to-neon-purple rounded hover:opacity-80 transition-opacity"
       >
-        CREATE PERMISSION
+        {{ t('admin.permissions.create') }}
       </button>
     </div>
 
@@ -160,7 +166,7 @@ onMounted(() => {
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Search permissions..."
+          :placeholder="t('admin.permissions.filter.search')"
           class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded text-white placeholder-gray-500 focus:border-neon-blue focus:outline-none"
         />
       </div>
@@ -171,9 +177,9 @@ onMounted(() => {
           v-model="selectedGroup"
           class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded text-white focus:border-neon-purple focus:outline-none [&>option]:bg-gray-900 [&>option]:text-white"
         >
-          <option value="all">All Groups ({{ permissions.length }})</option>
+          <option value="all">{{ t('admin.permissions.filter.allGroups', { count: permissions.length }) }}</option>
           <option v-for="group in resourceGroups" :key="group" :value="group">
-            {{ group.toUpperCase() }} ({{ groupCounts[group] }})
+            {{ t('admin.permissions.filter.groupCount', { group: formatGroupLabel(group), count: groupCounts[group] }) }}
           </option>
         </select>
       </div>
@@ -190,10 +196,10 @@ onMounted(() => {
         <!-- Group Header -->
         <div class="flex items-center gap-3 mb-3">
           <h3 class="text-lg font-bold text-white uppercase tracking-wider">
-            {{ group }}
+            {{ formatGroupLabel(group) }}
           </h3>
           <span class="px-2 py-0.5 text-xs font-bold rounded bg-neon-purple/20 text-neon-purple border border-neon-purple/30">
-            {{ perms.length }} {{ perms.length === 1 ? 'permission' : 'permissions' }}
+            {{ t('admin.permissions.count', perms.length, { count: perms.length }) }}
           </span>
         </div>
 
@@ -216,12 +222,12 @@ onMounted(() => {
                 </div>
               </div>
               <div class="flex items-center gap-3">
-                <span class="text-xs text-gray-500">ID: {{ permission.id }}</span>
+                <span class="text-xs text-gray-500">{{ t('users.table.id') }}: {{ permission.id }}</span>
                 <button
                   @click="deletePermission(permission)"
                   class="px-2.5 py-1 text-xs font-bold text-red-400 border border-red-400/30 rounded hover:bg-red-400/10 transition-colors"
                 >
-                  DELETE
+                  {{ t('common.actions.delete') }}
                 </button>
               </div>
             </div>
@@ -231,35 +237,35 @@ onMounted(() => {
 
       <!-- No Results -->
       <div v-if="Object.keys(filteredGroupedPermissions).length === 0" class="text-center py-12 text-gray-400">
-        <p v-if="searchQuery || selectedGroup !== 'all'">No permissions match your filters.</p>
-        <p v-else>No permissions found. Create your first permission above.</p>
+        <p v-if="searchQuery || selectedGroup !== 'all'">{{ t('admin.permissions.noResults') }}</p>
+        <p v-else>{{ t('admin.permissions.noPermissions') }}</p>
       </div>
     </div>
 
     <!-- Create Permission Modal -->
     <div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div class="bg-deep-space border border-white/10 rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 class="text-xl font-bold text-white mb-4">Create New Permission</h3>
+        <h3 class="text-xl font-bold text-white mb-4">{{ t('admin.permissions.createModal.title') }}</h3>
         
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">Permission Name</label>
+            <label class="block text-sm font-medium text-gray-300 mb-2">{{ t('admin.permissions.createModal.name') }}</label>
             <input
               v-model="newPermission.name"
               type="text"
               class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded text-white focus:border-neon-blue focus:outline-none"
-              placeholder="e.g., post.create"
+              :placeholder="t('admin.permissions.createModal.namePlaceholder')"
             />
-            <p class="text-xs text-gray-500 mt-1">Use dot notation: resource.action (e.g., user.edit, post.delete)</p>
+            <p class="text-xs text-gray-500 mt-1">{{ t('admin.permissions.createModal.nameHint') }}</p>
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+            <label class="block text-sm font-medium text-gray-300 mb-2">{{ t('admin.permissions.createModal.description') }}</label>
             <textarea
               v-model="newPermission.description"
               class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded text-white focus:border-neon-blue focus:outline-none"
               rows="3"
-              placeholder="Permission description..."
+              :placeholder="t('admin.permissions.createModal.descriptionPlaceholder')"
             ></textarea>
           </div>
         </div>
@@ -269,13 +275,13 @@ onMounted(() => {
             @click="createPermission"
             class="flex-1 px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-neon-blue to-neon-purple rounded hover:opacity-80"
           >
-            CREATE
+            {{ t('common.actions.create') }}
           </button>
           <button
             @click="closeCreateModal"
             class="flex-1 px-4 py-2 text-sm font-bold text-gray-300 border border-white/10 rounded hover:bg-white/5"
           >
-            CANCEL
+            {{ t('common.actions.cancel') }}
           </button>
         </div>
       </div>
@@ -283,12 +289,12 @@ onMounted(() => {
 
     <!-- Info Card -->
     <div class="mt-8 p-6 rounded-lg bg-gradient-to-br from-white/5 to-white/10 border border-white/10">
-      <h3 class="text-lg font-bold text-white mb-3">About Permissions</h3>
+      <h3 class="text-lg font-bold text-white mb-3">{{ t('admin.permissions.info.title') }}</h3>
       <div class="space-y-2 text-sm text-gray-300">
-        <p>• Permissions define specific actions users can perform in the system</p>
-        <p>• Permissions are grouped by resource (e.g., user.*, role.*, group.*)</p>
-        <p>• Use dot notation for permission names (e.g., user.create, post.delete)</p>
-        <p>• Use the Roles page to assign permissions to specific roles</p>
+        <p>{{ t('admin.permissions.info.line1') }}</p>
+        <p>{{ t('admin.permissions.info.line2') }}</p>
+        <p>{{ t('admin.permissions.info.line3') }}</p>
+        <p>{{ t('admin.permissions.info.line4') }}</p>
       </div>
     </div>
   </div>

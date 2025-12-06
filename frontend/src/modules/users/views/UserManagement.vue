@@ -3,9 +3,11 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../../auth/stores/auth'
 import { socketState, sendPrivateMessage } from '../../../services/socket'
+import { useI18n } from 'vue-i18n'
 
 const users = ref([])
 const authStore = useAuthStore()
+const { t } = useI18n()
 const error = ref('')
 const showMessageModal = ref(false)
 const showRoleModal = ref(false)
@@ -106,7 +108,7 @@ const saveUserRoles = async () => {
     await fetchUsers()
     closeRoleModal()
   } catch (e) {
-    error.value = 'Failed to update roles: ' + e.message
+    error.value = t('users.errors.updateRoles', { message: e.message })
   }
 }
 
@@ -134,7 +136,7 @@ const saveUserGroups = async () => {
     await fetchUsers()
     closeGroupModal()
   } catch (e) {
-    error.value = 'Failed to update groups: ' + e.message
+    error.value = t('users.errors.updateGroups', { message: e.message })
   }
 }
 
@@ -145,7 +147,7 @@ const fetchUsers = async () => {
     })
     users.value = response.data
   } catch (e) {
-    error.value = 'Failed to fetch users: ' + e.message
+    error.value = t('users.errors.fetchUsers', { message: e.message })
   }
 }
 
@@ -160,10 +162,10 @@ onMounted(async () => {
   <div class="container mx-auto px-4 py-12">
     <div class="flex items-center justify-between mb-8">
       <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-blue to-neon-purple">
-        USER MANAGEMENT
+        {{ t('users.title') }}
       </h2>
       <div class="px-4 py-2 text-xs font-bold text-neon-blue bg-neon-blue/10 rounded-full border border-neon-blue/20">
-        {{ users.length }} ACTIVE AGENTS
+        {{ t('users.activeAgents', { count: users.length }) }}
       </div>
     </div>
 
@@ -173,10 +175,10 @@ onMounted(async () => {
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="border-b border-white/10">
-            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">ID</th>
-            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Email Identity</th>
-            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Access Level</th>
-            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Status</th>
+            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">{{ t('users.table.id') }}</th>
+            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">{{ t('users.table.emailIdentity') }}</th>
+            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">{{ t('users.table.accessLevel') }}</th>
+            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">{{ t('users.table.status') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-white/5">
@@ -193,7 +195,7 @@ onMounted(async () => {
                 >
                   {{ role.name.toUpperCase() }}
                 </span>
-                <span v-if="!user.Roles || user.Roles.length === 0" class="text-xs text-gray-500">No roles</span>
+                <span v-if="!user.Roles || user.Roles.length === 0" class="text-xs text-gray-500">{{ t('users.roles.noRoles') }}</span>
               </div>
             </td>
             <td class="p-4 text-right">
@@ -203,29 +205,29 @@ onMounted(async () => {
                   class="px-3 py-1 text-xs font-bold text-neon-blue border border-neon-blue/30 rounded hover:bg-neon-blue/10 transition-colors"
                   v-if="user.id !== authStore.user?.id"
                 >
-                  MESSAGE
+                  {{ t('common.actions.message') }}
                 </button>
                 <button
                   @click="openRoleModal(user)"
                   class="px-3 py-1 text-xs font-bold text-neon-purple border border-neon-purple/30 rounded hover:bg-neon-purple/10 transition-colors"
                   v-if="authStore.user?.Roles?.some(r => r.name === 'admin')"
                 >
-                  ROLES
+                  {{ t('users.roles.button') }}
                 </button>
                 <button
                   @click="openGroupModal(user)"
                   class="px-3 py-1 text-xs font-bold text-neon-blue border border-neon-blue/30 rounded hover:bg-neon-blue/10 transition-colors"
                   v-if="authStore.user?.Roles?.some(r => r.name === 'admin')"
                 >
-                  GROUPS
+                  {{ t('users.groups.button') }}
                 </button>
                 <div v-if="socketState.onlineUsers.has(user.id)" class="inline-flex items-center gap-2">
                   <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                  <span class="text-xs text-green-400">ONLINE</span>
+                  <span class="text-xs text-green-400">{{ t('common.status.online') }}</span>
                 </div>
                 <div v-else class="inline-flex items-center gap-2">
                   <div class="w-2 h-2 rounded-full bg-gray-500"></div>
-                  <span class="text-xs text-gray-500">OFFLINE</span>
+                  <span class="text-xs text-gray-500">{{ t('common.status.offline') }}</span>
                 </div>
               </div>
             </td>
@@ -234,31 +236,31 @@ onMounted(async () => {
       </table>
     </div>
     <div v-else class="text-center py-12 text-gray-500">
-      No agents found in the system.
+      {{ t('users.noUsers') }}
     </div>
 
     <!-- Message Modal -->
     <div v-if="showMessageModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div class="w-full max-w-md bg-[#0a0a1f] border border-neon-blue/30 rounded-xl shadow-[0_0_50px_rgba(0,243,255,0.1)] overflow-hidden">
         <div class="p-6">
-          <h3 class="text-xl font-bold text-white mb-4">Message to {{ selectedUser?.email }}</h3>
+          <h3 class="text-xl font-bold text-white mb-4">{{ t('users.message.title', { email: selectedUser?.email || '' }) }}</h3>
           <textarea 
             v-model="messageText"
             class="w-full h-32 bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-neon-blue focus:outline-none transition-colors resize-none"
-            placeholder="Type your message..."
+            :placeholder="t('users.message.placeholder')"
           ></textarea>
           <div class="flex justify-end gap-3 mt-6">
             <button 
               @click="closeMessageModal"
               class="px-4 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors"
             >
-              CANCEL
+              {{ t('common.actions.cancel') }}
             </button>
             <button 
               @click="sendMessage"
               class="px-6 py-2 text-sm font-bold text-deep-space bg-neon-blue rounded-lg hover:bg-white hover:shadow-[0_0_20px_rgba(0,243,255,0.5)] transition-all duration-300"
             >
-              SEND
+              {{ t('common.actions.send') }}
             </button>
           </div>
         </div>
@@ -269,7 +271,7 @@ onMounted(async () => {
     <div v-if="showRoleModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div class="w-full max-w-md bg-[#0a0a1f] border border-neon-purple/30 rounded-xl shadow-[0_0_50px_rgba(168,85,247,0.1)] overflow-hidden">
         <div class="p-6">
-          <h3 class="text-xl font-bold text-white mb-4">Manage Roles for {{ selectedUser?.email }}</h3>
+          <h3 class="text-xl font-bold text-white mb-4">{{ t('users.roles.manage', { email: selectedUser?.email || '' }) }}</h3>
           <div class="space-y-2 max-h-96 overflow-y-auto">
             <label
               v-for="role in roles"
@@ -293,13 +295,13 @@ onMounted(async () => {
               @click="closeRoleModal"
               class="px-4 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors"
             >
-              CANCEL
+              {{ t('common.actions.cancel') }}
             </button>
             <button 
               @click="saveUserRoles"
               class="px-6 py-2 text-sm font-bold text-deep-space bg-neon-purple rounded-lg hover:bg-white hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all duration-300"
             >
-              SAVE
+              {{ t('common.actions.save') }}
             </button>
           </div>
         </div>
@@ -310,7 +312,7 @@ onMounted(async () => {
     <div v-if="showGroupModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div class="w-full max-w-md bg-[#0a0a1f] border border-neon-blue/30 rounded-xl shadow-[0_0_50px_rgba(0,243,255,0.1)] overflow-hidden">
         <div class="p-6">
-          <h3 class="text-xl font-bold text-white mb-4">Manage Groups for {{ selectedUser?.email }}</h3>
+          <h3 class="text-xl font-bold text-white mb-4">{{ t('users.groups.manage', { email: selectedUser?.email || '' }) }}</h3>
           <div class="space-y-2 max-h-96 overflow-y-auto">
             <label
               v-for="group in groups"
@@ -334,13 +336,13 @@ onMounted(async () => {
               @click="closeGroupModal"
               class="px-4 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors"
             >
-              CANCEL
+              {{ t('common.actions.cancel') }}
             </button>
             <button 
               @click="saveUserGroups"
               class="px-6 py-2 text-sm font-bold text-deep-space bg-neon-blue rounded-lg hover:bg-white hover:shadow-[0_0_20px_rgba(0,243,255,0.5)] transition-all duration-300"
             >
-              SAVE
+              {{ t('common.actions.save') }}
             </button>
           </div>
         </div>

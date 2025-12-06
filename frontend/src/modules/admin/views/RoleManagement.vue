@@ -3,9 +3,11 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '../../auth/stores/auth';
 import { useServices } from '../../../services/serviceContainer';
+import { useI18n } from 'vue-i18n';
 
 const authStore = useAuthStore();
 const { toast } = useServices();
+const { t } = useI18n();
 const roles = ref([]);
 const permissions = ref([]);
 const loading = ref(false);
@@ -23,8 +25,8 @@ const fetchRoles = async () => {
     });
     roles.value = response.data;
   } catch (error) {
-    console.error('Failed to fetch roles:', error);
-    toast.error('Failed to fetch roles');
+    console.error(t('admin.roles.errors.fetch'), error);
+    toast.error(t('admin.roles.errors.fetch'));
   } finally {
     loading.value = false;
   }
@@ -37,7 +39,7 @@ const fetchPermissions = async () => {
     });
     permissions.value = response.data;
   } catch (error) {
-    console.error('Failed to fetch permissions:', error);
+    console.error(t('admin.roles.errors.fetchPermissions'), error);
   }
 };
 
@@ -53,7 +55,7 @@ const closeCreateModal = () => {
 
 const createRole = async () => {
   if (!newRole.value.name) {
-    toast.warning('Role name is required');
+    toast.warning(t('admin.roles.errors.nameRequired'));
     return;
   }
 
@@ -61,12 +63,12 @@ const createRole = async () => {
     await axios.post('http://localhost:3000/roles', newRole.value, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });
-    toast.success('Role created successfully!');
+    toast.success(t('admin.roles.success.create'));
     await fetchRoles();
     closeCreateModal();
   } catch (error) {
-    console.error('Failed to create role:', error);
-    toast.error(error.response?.data?.message || 'Failed to create role');
+    console.error(t('admin.roles.errors.create'), error);
+    toast.error(error.response?.data?.message || t('admin.roles.errors.create'));
   }
 };
 
@@ -89,27 +91,27 @@ const assignPermissions = async () => {
       { permissionIds: selectedPermissions.value },
       { headers: { Authorization: `Bearer ${authStore.token}` } }
     );
-    toast.success('Permissions updated successfully!');
+    toast.success(t('admin.roles.success.assign'));
     await fetchRoles();
     closePermissionsModal();
   } catch (error) {
-    console.error('Failed to assign permissions:', error);
-    toast.error('Failed to assign permissions');
+    console.error(t('admin.roles.errors.assign'), error);
+    toast.error(t('admin.roles.errors.assign'));
   }
 };
 
 const deleteRole = async (role) => {
-  if (!confirm(`Delete role "${role.name}"?`)) return;
+  if (!confirm(t('admin.roles.deleteConfirm', { name: role.name }))) return;
 
   try {
     await axios.delete(`http://localhost:3000/roles/${role.id}`, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });
-    toast.success('Role deleted successfully!');
+    toast.success(t('admin.roles.success.delete'));
     await fetchRoles();
   } catch (error) {
-    console.error('Failed to delete role:', error);
-    toast.error(error.response?.data?.message || 'Failed to delete role');
+    console.error(t('admin.roles.errors.delete'), error);
+    toast.error(error.response?.data?.message || t('admin.roles.errors.delete'));
   }
 };
 
@@ -123,13 +125,13 @@ onMounted(() => {
   <div class="container mx-auto px-4 py-12">
     <div class="flex items-center justify-between mb-8">
       <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-purple to-neon-blue">
-        ROLE MANAGEMENT
+        {{ t('admin.roles.title') }}
       </h2>
       <button
         @click="openCreateModal"
         class="px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-neon-purple to-neon-blue rounded hover:opacity-80 transition-opacity"
       >
-        CREATE ROLE
+        {{ t('admin.roles.create') }}
       </button>
     </div>
 
@@ -147,7 +149,7 @@ onMounted(() => {
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <h3 class="text-xl font-bold text-white mb-2">{{ role.name.toUpperCase() }}</h3>
-            <p class="text-sm text-gray-400 mb-4">{{ role.description || 'No description' }}</p>
+            <p class="text-sm text-gray-400 mb-4">{{ role.description || t('admin.roles.noDescription') }}</p>
             
             <div class="flex flex-wrap gap-2">
               <span
@@ -158,7 +160,7 @@ onMounted(() => {
                 {{ perm.name }}
               </span>
               <span v-if="!role.Permissions || role.Permissions.length === 0" class="text-xs text-gray-500">
-                No permissions assigned
+                {{ t('admin.roles.permissions.noPermissions') }}
               </span>
             </div>
           </div>
@@ -168,14 +170,14 @@ onMounted(() => {
               @click="openPermissionsModal(role)"
               class="px-3 py-1 text-xs font-bold text-neon-purple border border-neon-purple/30 rounded hover:bg-neon-purple/10 transition-colors"
             >
-              PERMISSIONS
+              {{ t('admin.roles.permissions.button') }}
             </button>
             <button
               v-if="role.name !== 'admin' && role.name !== 'user'"
               @click="deleteRole(role)"
               class="px-3 py-1 text-xs font-bold text-red-400 border border-red-400/30 rounded hover:bg-red-400/10 transition-colors"
             >
-              DELETE
+              {{ t('common.actions.delete') }}
             </button>
           </div>
         </div>
@@ -185,26 +187,26 @@ onMounted(() => {
     <!-- Create Role Modal -->
     <div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div class="bg-deep-space border border-white/10 rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 class="text-xl font-bold text-white mb-4">Create New Role</h3>
+        <h3 class="text-xl font-bold text-white mb-4">{{ t('admin.roles.createModal.title') }}</h3>
         
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">Role Name</label>
+            <label class="block text-sm font-medium text-gray-300 mb-2">{{ t('admin.roles.createModal.name') }}</label>
             <input
               v-model="newRole.name"
               type="text"
               class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded text-white focus:border-neon-purple focus:outline-none"
-              placeholder="e.g., moderator"
+              :placeholder="t('admin.roles.createModal.namePlaceholder')"
             />
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+            <label class="block text-sm font-medium text-gray-300 mb-2">{{ t('admin.roles.createModal.description') }}</label>
             <textarea
               v-model="newRole.description"
               class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded text-white focus:border-neon-purple focus:outline-none"
               rows="3"
-              placeholder="Role description..."
+              :placeholder="t('admin.roles.createModal.descriptionPlaceholder')"
             ></textarea>
           </div>
         </div>
@@ -214,13 +216,13 @@ onMounted(() => {
             @click="createRole"
             class="flex-1 px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-neon-purple to-neon-blue rounded hover:opacity-80"
           >
-            CREATE
+            {{ t('common.actions.create') }}
           </button>
           <button
             @click="closeCreateModal"
             class="flex-1 px-4 py-2 text-sm font-bold text-gray-300 border border-white/10 rounded hover:bg-white/5"
           >
-            CANCEL
+            {{ t('common.actions.cancel') }}
           </button>
         </div>
       </div>
@@ -229,7 +231,7 @@ onMounted(() => {
     <!-- Permissions Modal -->
     <div v-if="showPermissionsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div class="bg-deep-space border border-white/10 rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 class="text-xl font-bold text-white mb-4">Manage Permissions for {{ selectedRole?.name }}</h3>
+        <h3 class="text-xl font-bold text-white mb-4">{{ t('admin.roles.permissions.title', { name: selectedRole?.name || '' }) }}</h3>
         
         <div class="space-y-2 max-h-96 overflow-y-auto">
           <label
@@ -255,13 +257,13 @@ onMounted(() => {
             @click="assignPermissions"
             class="flex-1 px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-neon-purple to-neon-blue rounded hover:opacity-80"
           >
-            SAVE
+            {{ t('common.actions.save') }}
           </button>
           <button
             @click="closePermissionsModal"
             class="flex-1 px-4 py-2 text-sm font-bold text-gray-300 border border-white/10 rounded hover:bg-white/5"
           >
-            CANCEL
+            {{ t('common.actions.cancel') }}
           </button>
         </div>
       </div>

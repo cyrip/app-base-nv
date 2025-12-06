@@ -18,12 +18,32 @@
         "message": "NACHRICHT",
         "connect": "VERBINDEN",
         "logout": "ABMELDEN",
-        "login": "Anmelden"
+        "login": "Anmelden",
+        "close": "Schließen",
+        "getStarted": "Loslegen"
     },
     "status": {
         "online": "ONLINE",
         "offline": "OFFLINE",
         "connected": "VERBUNDEN",
         "disconnected": "GETRENNT"
+    },
+    "languages": {
+        "en": "Englisch",
+        "hu": "Ungarisch",
+        "de": "Deutsch"
+    },
+    "landing": {
+        "hero": {
+            "title": "Die Zukunft von",
+            "highlight": "KI-AGENTEN",
+            "subtitle": "Orchestrieren Sie autonome Agenten mit einer Next-Gen-Oberfläche. Für Skalierbarkeit gebaut, für die Zukunft gemacht.",
+            "ctaPrimary": "Loslegen"
+        },
+        "stats": {
+            "efficiency": "Effizienz",
+            "uptime": "Betriebszeit",
+            "agents": "Agenten"
+        }
     }
 }
