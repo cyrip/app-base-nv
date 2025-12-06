@@ -19,6 +19,14 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    languageId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Languages',
+            key: 'id'
+        }
+    }
 });
 
 module.exports = User;

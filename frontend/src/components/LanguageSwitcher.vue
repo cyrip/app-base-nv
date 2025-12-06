@@ -7,29 +7,36 @@ const { locale, t } = useI18n();
 const languages = computed(() => [
   { code: 'en', name: t('common.languages.en'), flag: '🇬🇧' },
   { code: 'hu', name: t('common.languages.hu'), flag: '🇭🇺' },
-  { code: 'de', name: t('common.languages.de'), flag: '🇩🇪' }
+  { code: 'de', name: t('common.languages.de'), flag: '🇩🇪' },
+  { code: 'es', name: t('common.languages.es'), flag: '🇪🇸' }
 ]);
 
-const changeLanguage = (lang) => {
-  locale.value = lang;
-  localStorage.setItem('locale', lang);
-};
+const selectedLanguage = computed({
+  get: () => locale.value,
+  set: (lang) => {
+    locale.value = lang;
+    localStorage.setItem('locale', lang);
+  }
+});
 </script>
 
 <template>
-  <div class="flex gap-2">
-    <button
-      v-for="lang in languages"
-      :key="lang.code"
-      @click="changeLanguage(lang.code)"
-      :class="[
-        'px-3 py-1 text-xs font-bold rounded transition-colors',
-        locale === lang.code
-          ? 'bg-neon-blue text-white'
-          : 'text-gray-400 hover:text-white border border-white/10'
-      ]"
+  <div class="relative">
+    <select
+      v-model="selectedLanguage"
+      class="appearance-none bg-white/10 border border-white/20 text-xs font-bold rounded px-3 py-2 pr-8 text-white focus:outline-none focus:border-neon-blue transition-colors backdrop-blur"
     >
-      {{ lang.flag }} {{ lang.name }}
-    </button>
+      <option
+        v-for="lang in languages"
+        :key="lang.code"
+        :value="lang.code"
+        class="bg-deep-space text-white"
+      >
+        {{ lang.flag }} {{ lang.name }}
+      </option>
+    </select>
+    <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">
+      ▾
+    </span>
   </div>
 </template>

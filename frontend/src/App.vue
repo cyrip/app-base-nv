@@ -46,6 +46,7 @@ onUnmounted(() => {
       <div class="flex gap-6 text-sm font-medium text-gray-300" v-if="$route.name !== 'login'">
         <router-link to="/" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.home') }}</router-link>
         <router-link to="/users" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.users') }}</router-link>
+        <router-link to="/profile" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.profile') }}</router-link>
         <router-link 
           v-if="authStore.user?.Roles?.some(r => r.name === 'admin')" 
           to="/roles" 
@@ -70,13 +71,13 @@ onUnmounted(() => {
       </div>
       <div v-if="$route.name !== 'login'" class="flex items-center gap-4">
          <LanguageSwitcher />
-         <div v-if="authStore.user" class="flex items-center gap-4">
-            <div class="flex flex-col items-end">
-              <span class="text-xs font-bold text-gray-400">{{ authStore.user.email }}</span>
-              <span class="text-[10px] text-gray-500" v-if="authStore.user.Roles">
+        <div v-if="authStore.user" class="flex items-center gap-4">
+            <router-link to="/profile" class="flex flex-col items-end group">
+              <span class="text-xs font-bold text-gray-400 group-hover:text-neon-blue transition-colors">{{ authStore.user.email }}</span>
+              <span class="text-[10px] text-gray-500 group-hover:text-gray-300 transition-colors" v-if="authStore.user.Roles">
                 {{ t('auth.user.roles') }}: {{ authStore.user.Roles.map(r => r.name).join(', ') }}
               </span>
-              <span class="text-[10px] text-red-500" v-else>
+              <span class="text-[10px] text-red-500 group-hover:text-red-300 transition-colors" v-else>
                 {{ t('auth.user.noRoles') }}
               </span>
               <div class="flex items-center gap-1.5">
@@ -85,7 +86,7 @@ onUnmounted(() => {
                     {{ socketState.connected ? t('common.status.connected') : t('common.status.disconnected') }}
                  </span>
               </div>
-            </div>
+            </router-link>
             <button @click="handleLogout" class="px-4 py-1.5 text-xs font-bold text-red-400 border border-red-400/30 rounded-full hover:bg-red-400/10 transition-all duration-300">
               {{ t('common.actions.logout') }}
             </button>

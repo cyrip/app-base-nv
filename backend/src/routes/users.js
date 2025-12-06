@@ -6,6 +6,10 @@ const auth = require('../middleware/auth');
 // Get all users (Protected)
 router.get('/', auth, userController.getUsers);
 
+// Current user profile
+router.get('/me', auth, userController.getProfile);
+router.put('/me', auth, userController.updateProfile);
+
 // Update user (Protected)
 router.put('/:id', auth, userController.updateUser);
 

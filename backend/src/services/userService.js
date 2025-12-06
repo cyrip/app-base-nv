@@ -1,4 +1,6 @@
-const { User, Role, Group } = require('../models');
+const { User, Role, Group, Language } = require('../models');
+const bcrypt = require('bcryptjs');
+const { getDefaultLanguage } = require('./languageService');
 
 class UserService {
     async getAllUsers() {
@@ -12,6 +14,10 @@ class UserService {
                 model: Group,
                 through: { attributes: [] },
                 attributes: ['id', 'name', 'description']
+            }, {
+                model: Language,
+                as: 'Language',
+                attributes: ['id', 'code', 'name', 'description']
             }]
         });
     }
@@ -28,6 +34,7 @@ class UserService {
         }
 
         if (data.email) user.email = data.email;
+        if (data.languageId) user.languageId = data.languageId;
 
         await user.save();
         return { id: user.id, email: user.email };
@@ -123,6 +130,65 @@ class UserService {
         });
 
         return { message: 'Group removed successfully', user: updatedUser };
+    }
+
+    async getProfile(userId) {
+        const user = await User.findByPk(userId, {
+            attributes: { exclude: ['password'] },
+            include: [{
+                model: Role,
+                through: { attributes: [] },
+                attributes: ['id', 'name']
+            }, {
+                model: Group,
+                through: { attributes: [] },
+                attributes: ['id', 'name', 'description']
+            }, {
+                model: Language,
+                as: 'Language',
+                attributes: ['id', 'code', 'name', 'description']
+            }]
+        });
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        return user;
+    }
+
+    async updateProfile(userId, { currentPassword, newPassword, languageId }) {
+        const user = await User.findByPk(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        if (newPassword) {
+            if (!currentPassword) {
+                throw new Error('Current password required');
+            }
+
+            const valid = await bcrypt.compare(currentPassword, user.password);
+            if (!valid) {
+                throw new Error('Invalid current password');
+            }
+
+            user.password = await bcrypt.hash(newPassword, 10);
+        }
+
+        if (languageId) {
+            const language = await Language.findByPk(languageId);
+            if (!language) {
+                throw new Error('Language not found');
+            }
+            user.languageId = language.id;
+        } else if (!user.languageId) {
+            const defaultLanguage = await getDefaultLanguage();
+            user.languageId = defaultLanguage?.id || null;
+        }
+
+        await user.save();
+        return this.getProfile(userId);
     }
 }
 

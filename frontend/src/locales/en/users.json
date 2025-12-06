@@ -25,6 +25,18 @@
         "button": "GROUPS",
         "noGroups": "No groups"
     },
+    "profile": {
+        "title": "User Profile",
+        "subtitle": "Manage your account preferences",
+        "languageLabel": "Preferred Language",
+        "languageHelp": "Choose the language you want to use across the app.",
+        "passwordTitle": "Change Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "passwordMismatch": "New passwords do not match",
+        "success": "Profile updated successfully"
+    },
     "errors": {
         "fetchUsers": "Failed to fetch users: {message}",
         "updateRoles": "Failed to update roles: {message}",

@@ -1,0 +1,96 @@
+{
+    "roles": {
+        "title": "ADMINISTRACIÓN DE ROLES",
+        "create": "CREAR ROL",
+        "createModal": {
+            "title": "Crear nuevo rol",
+            "name": "Nombre del rol",
+            "namePlaceholder": "p. ej., moderador",
+            "description": "Descripción",
+            "descriptionPlaceholder": "Descripción del rol..."
+        },
+        "permissions": {
+            "title": "Administrar permisos para {name}",
+            "button": "PERMISOS",
+            "noPermissions": "Sin permisos asignados"
+        },
+        "noDescription": "Sin descripción",
+        "deleteConfirm": "¿Eliminar el rol \"{name}\"?",
+        "errors": {
+            "fetch": "No se pudieron cargar los roles",
+            "fetchPermissions": "No se pudieron cargar los permisos",
+            "nameRequired": "El nombre del rol es obligatorio",
+            "create": "No se pudo crear el rol",
+            "assign": "No se pudieron asignar los permisos",
+            "delete": "No se pudo eliminar el rol"
+        },
+        "success": {
+            "create": "¡Rol creado con éxito!",
+            "assign": "¡Permisos actualizados correctamente!",
+            "delete": "¡Rol eliminado con éxito!"
+        }
+    },
+    "groups": {
+        "title": "ADMINISTRACIÓN DE GRUPOS",
+        "create": "CREAR GRUPO",
+        "createModal": {
+            "title": "Crear nuevo grupo",
+            "name": "Nombre del grupo",
+            "namePlaceholder": "p. ej., Ingeniería",
+            "description": "Descripción",
+            "descriptionPlaceholder": "Descripción del grupo..."
+        },
+        "noGroups": "Aún no hay grupos creados",
+        "noDescription": "Sin descripción",
+        "deleteConfirm": "¿Eliminar el grupo \"{name}\"?",
+        "errors": {
+            "fetch": "No se pudieron cargar los grupos",
+            "nameRequired": "El nombre del grupo es obligatorio",
+            "create": "No se pudo crear el grupo",
+            "delete": "No se pudo eliminar el grupo"
+        },
+        "success": {
+            "create": "¡Grupo creado con éxito!",
+            "delete": "¡Grupo eliminado con éxito!"
+        }
+    },
+    "permissions": {
+        "title": "ADMINISTRACIÓN DE PERMISOS",
+        "create": "CREAR PERMISO",
+        "createModal": {
+            "title": "Crear nuevo permiso",
+            "name": "Nombre del permiso",
+            "namePlaceholder": "p. ej., post.create",
+            "nameHint": "Use notación con punto: recurso.acción (p. ej., user.edit, post.delete)",
+            "description": "Descripción",
+            "descriptionPlaceholder": "Descripción del permiso..."
+        },
+        "filter": {
+            "search": "Buscar permisos...",
+            "allGroups": "Todos los grupos ({count})",
+            "groupCount": "{group} ({count})"
+        },
+        "otherGroup": "Otros",
+        "info": {
+            "title": "Sobre los permisos",
+            "line1": "• Los permisos definen acciones específicas que los usuarios pueden realizar en el sistema",
+            "line2": "• Los permisos se agrupan por recurso (p. ej., user.*, role.*, group.*)",
+            "line3": "• Use notación con punto para los nombres (p. ej., user.create, post.delete)",
+            "line4": "• Use la página de Roles para asignar permisos a roles específicos"
+        },
+        "noPermissions": "No se encontraron permisos. Cree el primero arriba.",
+        "noResults": "Ningún permiso coincide con sus filtros.",
+        "count": "{count} permiso | {count} permisos",
+        "deleteConfirm": "¿Eliminar el permiso \"{name}\"?",
+        "errors": {
+            "fetch": "No se pudieron cargar los permisos",
+            "nameRequired": "El nombre del permiso es obligatorio",
+            "create": "No se pudo crear el permiso",
+            "delete": "No se pudo eliminar el permiso"
+        },
+        "success": {
+            "create": "¡Permiso creado con éxito!",
+            "delete": "¡Permiso eliminado con éxito!"
+        }
+    }
+}

@@ -31,6 +31,33 @@ class UserController {
         }
     }
 
+    async getProfile(req, res) {
+        try {
+            const user = await userService.getProfile(req.userId);
+            res.json(user);
+        } catch (error) {
+            if (error.message === 'User not found') {
+                res.status(404).json({ message: error.message });
+            } else {
+                res.status(500).json({ error: error.message });
+            }
+        }
+    }
+
+    async updateProfile(req, res) {
+        try {
+            const { currentPassword, newPassword, languageId } = req.body;
+            const user = await userService.updateProfile(req.userId, { currentPassword, newPassword, languageId });
+            res.json({ message: 'Profile updated', user });
+        } catch (error) {
+            if (error.message === 'User not found' || error.message === 'Language not found' || error.message === 'Invalid current password' || error.message === 'Current password required') {
+                res.status(400).json({ message: error.message });
+            } else {
+                res.status(500).json({ error: error.message });
+            }
+        }
+    }
+
     // POST /api/users/:id/roles - Assign role to user
     async assignRole(req, res) {
         try {

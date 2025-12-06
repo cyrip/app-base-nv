@@ -25,6 +25,18 @@
         "button": "CSOPORTOK",
         "noGroups": "Nincsenek csoportok"
     },
+    "profile": {
+        "title": "Felhasználói profil",
+        "subtitle": "Kezelje fiókbeállításait",
+        "languageLabel": "Preferált nyelv",
+        "languageHelp": "Válassza ki az alkalmazás nyelvét.",
+        "passwordTitle": "Jelszó módosítása",
+        "currentPassword": "Jelenlegi jelszó",
+        "newPassword": "Új jelszó",
+        "confirmPassword": "Új jelszó megerősítése",
+        "passwordMismatch": "Az új jelszavak nem egyeznek",
+        "success": "Profil sikeresen frissítve"
+    },
     "errors": {
         "fetchUsers": "A felhasználók lekérése sikertelen: {message}",
         "updateRoles": "A szerepkörök frissítése sikertelen: {message}",

@@ -5,7 +5,8 @@
         "users": "Benutzer",
         "roles": "Rollen",
         "groups": "Gruppen",
-        "permissions": "Berechtigungen"
+        "permissions": "Berechtigungen",
+        "profile": "Profil"
     },
     "actions": {
         "save": "SPEICHERN",
@@ -20,7 +21,8 @@
         "logout": "ABMELDEN",
         "login": "Anmelden",
         "close": "Schließen",
-        "getStarted": "Loslegen"
+        "getStarted": "Loslegen",
+        "update": "AKTUALISIEREN"
     },
     "status": {
         "online": "ONLINE",
@@ -31,7 +33,8 @@
     "languages": {
         "en": "Englisch",
         "hu": "Ungarisch",
-        "de": "Deutsch"
+        "de": "Deutsch",
+        "es": "Spanisch"
     },
     "landing": {
         "hero": {

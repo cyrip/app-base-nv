@@ -1,0 +1,52 @@
+{
+    "app": {
+        "title": "AGENTAPP",
+        "home": "Inicio",
+        "users": "Usuarios",
+        "roles": "Roles",
+        "groups": "Grupos",
+        "permissions": "Permisos",
+        "profile": "Perfil"
+    },
+    "actions": {
+        "save": "GUARDAR",
+        "cancel": "CANCELAR",
+        "delete": "ELIMINAR",
+        "edit": "EDITAR",
+        "create": "CREAR",
+        "search": "Buscar",
+        "send": "ENVIAR",
+        "message": "MENSAJE",
+        "connect": "CONECTAR",
+        "logout": "CERRAR SESIÓN",
+        "login": "Iniciar sesión",
+        "close": "Cerrar",
+        "getStarted": "Comenzar",
+        "update": "ACTUALIZAR"
+    },
+    "status": {
+        "online": "EN LÍNEA",
+        "offline": "FUERA DE LÍNEA",
+        "connected": "CONECTADO",
+        "disconnected": "DESCONECTADO"
+    },
+    "languages": {
+        "en": "Inglés",
+        "hu": "Húngaro",
+        "de": "Alemán",
+        "es": "Español"
+    },
+    "landing": {
+        "hero": {
+            "title": "El futuro de",
+            "highlight": "AGENTES IA",
+            "subtitle": "Orqueste agentes autónomos con una interfaz de nueva generación. Diseñado para escalar, creado para el futuro.",
+            "ctaPrimary": "Comenzar"
+        },
+        "stats": {
+            "efficiency": "Eficiencia",
+            "uptime": "Disponibilidad",
+            "agents": "Agentes"
+        }
+    }
+}

@@ -3,6 +3,7 @@ const User = require('./User');
 const Role = require('./Role');
 const Group = require('./Group');
 const Permission = require('./Permission');
+const Language = require('./Language');
 
 // Define Associations
 
@@ -18,10 +19,15 @@ Group.belongsToMany(User, { through: 'UserGroups' });
 Role.belongsToMany(Permission, { through: 'RolePermissions' });
 Permission.belongsToMany(Role, { through: 'RolePermissions' });
 
+// User -> Language
+Language.hasMany(User, { foreignKey: 'languageId' });
+User.belongsTo(Language, { foreignKey: 'languageId', as: 'Language' });
+
 module.exports = {
     sequelize,
     User,
     Role,
     Group,
-    Permission
+    Permission,
+    Language
 };

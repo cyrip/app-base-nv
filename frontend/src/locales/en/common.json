@@ -5,7 +5,8 @@
         "users": "Users",
         "roles": "Roles",
         "groups": "Groups",
-        "permissions": "Permissions"
+        "permissions": "Permissions",
+        "profile": "Profile"
     },
     "actions": {
         "save": "SAVE",
@@ -20,7 +21,8 @@
         "logout": "LOGOUT",
         "login": "Login",
         "close": "Close",
-        "getStarted": "Get Started"
+        "getStarted": "Get Started",
+        "update": "UPDATE"
     },
     "status": {
         "online": "ONLINE",
@@ -31,7 +33,8 @@
     "languages": {
         "en": "English",
         "hu": "Hungarian",
-        "de": "German"
+        "de": "German",
+        "es": "Spanish"
     },
     "landing": {
         "hero": {

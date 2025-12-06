@@ -5,6 +5,10 @@ import enCommon from '../locales/en/common.json';
 import enAuth from '../locales/en/auth.json';
 import enUsers from '../locales/en/users.json';
 import enAdmin from '../locales/en/admin.json';
+import esCommon from '../locales/es/common.json';
+import esAuth from '../locales/es/auth.json';
+import esUsers from '../locales/es/users.json';
+import esAdmin from '../locales/es/admin.json';
 
 // Import Hungarian translations
 import huCommon from '../locales/hu/common.json';
@@ -24,6 +28,12 @@ const messages = {
         auth: enAuth,
         users: enUsers,
         admin: enAdmin
+    },
+    es: {
+        common: esCommon,
+        auth: esAuth,
+        users: esUsers,
+        admin: esAdmin
     },
     hu: {
         common: huCommon,

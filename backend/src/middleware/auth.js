@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User, Role, Group } = require('../models');
+const { User, Role, Group, Language } = require('../models');
 
 const verifyToken = async (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
@@ -15,7 +15,8 @@ const verifyToken = async (req, res, next) => {
         const user = await User.findByPk(decoded.id, {
             include: [
                 { model: Role, through: { attributes: [] } },
-                { model: Group, through: { attributes: [] } }
+                { model: Group, through: { attributes: [] } },
+                { model: Language, as: 'Language', attributes: ['id', 'code', 'name'] }
             ]
         });
 

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { initSocket, disconnectSocket } from '../../../services/socket'
+import i18n from '../../../i18n'
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -17,7 +18,15 @@ export const useAuthStore = defineStore('auth', {
             this.user = response.data.user
             localStorage.setItem('token', this.token)
             localStorage.setItem('user', JSON.stringify(this.user))
+            if (this.user?.Language?.code) {
+                i18n.global.locale.value = this.user.Language.code
+                localStorage.setItem('locale', this.user.Language.code)
+            }
             initSocket(this.token)
+        },
+        setUser(user) {
+            this.user = user
+            localStorage.setItem('user', JSON.stringify(user))
         },
         logout() {
             this.token = null

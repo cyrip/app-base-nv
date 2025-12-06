@@ -5,7 +5,8 @@
         "users": "Felhasználók",
         "roles": "Szerepkörök",
         "groups": "Csoportok",
-        "permissions": "Jogosultságok"
+        "permissions": "Jogosultságok",
+        "profile": "Profil"
     },
     "actions": {
         "save": "MENTÉS",
@@ -20,7 +21,8 @@
         "logout": "KIJELENTKEZÉS",
         "login": "Bejelentkezés",
         "close": "Bezárás",
-        "getStarted": "Kezdd el"
+        "getStarted": "Kezdd el",
+        "update": "FRISSÍTÉS"
     },
     "status": {
         "online": "ONLINE",
@@ -31,7 +33,8 @@
     "languages": {
         "en": "Angol",
         "hu": "Magyar",
-        "de": "Német"
+        "de": "Német",
+        "es": "Spanyol"
     },
     "landing": {
         "hero": {

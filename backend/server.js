@@ -5,6 +5,7 @@ const { sequelize } = require('./src/models');
 const PORT = process.env.PORT || 3000;
 
 const seedUsers = require('./src/seeders/init.js');
+const seedLanguages = require('./src/seeders/languageSeeder');
 require('./src/helpers/authHelpers'); // Load User helper methods
 
 const http = require('http');
@@ -18,7 +19,12 @@ const startServer = async () => {
         await sequelize.sync({ force: false });
         console.log('Database synced');
 
+        // Ensure languageId column exists
+        const ensureLanguageColumn = require('./src/migrations/addLanguageColumn');
+        await ensureLanguageColumn();
+
         // Run seeders
+        await seedLanguages();
         await seedUsers();
 
         // Run role migration

@@ -1,0 +1,45 @@
+{
+    "title": "ADMINISTRACIÓN DE USUARIOS",
+    "table": {
+        "id": "ID",
+        "email": "Correo",
+        "roles": "Roles",
+        "emailIdentity": "Identidad de correo",
+        "accessLevel": "Nivel de acceso",
+        "status": "Estado",
+        "actions": "Acciones"
+    },
+    "activeAgents": "{count} AGENTES ACTIVOS",
+    "noUsers": "No se encontraron agentes en el sistema.",
+    "message": {
+        "title": "Mensaje para {email}",
+        "placeholder": "Escribe tu mensaje..."
+    },
+    "roles": {
+        "manage": "Administrar roles para {email}",
+        "button": "ROLES",
+        "noRoles": "Sin roles"
+    },
+    "groups": {
+        "manage": "Administrar grupos para {email}",
+        "button": "GRUPOS",
+        "noGroups": "Sin grupos"
+    },
+    "profile": {
+        "title": "Perfil de usuario",
+        "subtitle": "Administre las preferencias de su cuenta",
+        "languageLabel": "Idioma preferido",
+        "languageHelp": "Elija el idioma que desea usar en la aplicación.",
+        "passwordTitle": "Cambiar contraseña",
+        "currentPassword": "Contraseña actual",
+        "newPassword": "Nueva contraseña",
+        "confirmPassword": "Confirmar nueva contraseña",
+        "passwordMismatch": "Las nuevas contraseñas no coinciden",
+        "success": "Perfil actualizado con éxito"
+    },
+    "errors": {
+        "fetchUsers": "No se pudieron obtener los usuarios: {message}",
+        "updateRoles": "No se pudieron actualizar los roles: {message}",
+        "updateGroups": "No se pudieron actualizar los grupos: {message}"
+    }
+}

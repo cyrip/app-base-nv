@@ -1,22 +1,28 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { getDefaultLanguage } = require('./languageService');
 
 class AuthService {
     async register(email, password) {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await User.create({ email, password: hashedPassword });
+        const defaultLanguage = await getDefaultLanguage();
+        const user = await User.create({ email, password: hashedPassword, languageId: defaultLanguage?.id });
         return { id: user.id, email: user.email };
     }
 
     async login(email, password) {
-        const { User, Role } = require('../models');
+        const { User, Role, Language } = require('../models');
         const user = await User.findOne({
             where: { email },
             include: [{
                 model: Role,
                 through: { attributes: [] },
                 attributes: ['id', 'name']
+            }, {
+                model: Language,
+                as: 'Language',
+                attributes: ['id', 'code', 'name']
             }]
         });
         if (!user) {
@@ -39,7 +45,8 @@ class AuthService {
             user: {
                 id: user.id,
                 email: user.email,
-                Roles: user.Roles
+                Roles: user.Roles,
+                Language: user.Language
             }
         };
     }

@@ -5,6 +5,7 @@ import UserManagement from '../modules/users/views/UserManagement.vue'
 import RoleManagement from '../modules/admin/views/RoleManagement.vue'
 import GroupManagement from '../modules/admin/views/GroupManagement.vue'
 import PermissionManagement from '../modules/admin/views/PermissionManagement.vue'
+import UserProfile from '../modules/profile/views/UserProfile.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,6 +39,11 @@ const router = createRouter({
             path: '/permissions',
             name: 'permissions',
             component: PermissionManagement
+        },
+        {
+            path: '/profile',
+            name: 'profile',
+            component: UserProfile
         }
     ]
 })
