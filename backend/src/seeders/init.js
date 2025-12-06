@@ -22,8 +22,7 @@ const seedUsers = async () => {
                 const hashedPassword = await bcrypt.hash(user.password, 10);
                 await User.create({
                     email: user.email,
-                    password: hashedPassword,
-                    role: user.role
+                    password: hashedPassword
                 });
                 console.log(`User ${user.email} created.`);
             } else {

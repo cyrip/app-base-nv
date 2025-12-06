@@ -1,6 +1,6 @@
 require('dotenv').config();
 const app = require('./src/app');
-const sequelize = require('./src/config/database');
+const { sequelize } = require('./src/models');
 
 const PORT = process.env.PORT || 3000;
 
@@ -19,6 +19,19 @@ const startServer = async () => {
 
         // Run seeders
         await seedUsers();
+
+        // Run role migration
+        const migrateRoles = require('./src/migrations/migrateRoles');
+        await migrateRoles();
+
+        // Drop old role column if it exists
+        try {
+            await sequelize.queryInterface.removeColumn('Users', 'role');
+            console.log('Old role column removed');
+        } catch (error) {
+            // Column might already be removed
+            console.log('Role column already removed or does not exist');
+        }
 
         // Initialize Queue
         const { agentQueue } = require('./src/config/queue');

@@ -70,12 +70,17 @@ onMounted(async () => {
             <td class="p-4 text-sm font-mono text-gray-400 group-hover:text-white transition-colors">#{{ user.id }}</td>
             <td class="p-4 text-sm font-medium text-white group-hover:text-neon-blue transition-colors">{{ user.email }}</td>
             <td class="p-4">
-              <span 
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
-                :class="user.role === 'admin' ? 'bg-neon-purple/10 text-neon-purple border-neon-purple/20' : 'bg-neon-blue/10 text-neon-blue border-neon-blue/20'"
-              >
-                {{ user.role.toUpperCase() }}
-              </span>
+              <div class="flex gap-1.5 flex-wrap">
+                <span 
+                  v-for="role in user.Roles" 
+                  :key="role.id"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                  :class="role.name === 'admin' ? 'bg-neon-purple/10 text-neon-purple border-neon-purple/20' : 'bg-neon-blue/10 text-neon-blue border-neon-blue/20'"
+                >
+                  {{ role.name.toUpperCase() }}
+                </span>
+                <span v-if="!user.Roles || user.Roles.length === 0" class="text-xs text-gray-500">No roles</span>
+              </div>
             </td>
             <td class="p-4 text-right">
               <div class="flex items-center justify-end gap-3">
