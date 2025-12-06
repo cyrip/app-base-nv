@@ -30,6 +30,64 @@ class UserController {
             }
         }
     }
+
+    // POST /api/users/:id/roles - Assign role to user
+    async assignRole(req, res) {
+        try {
+            const { roleId } = req.body;
+            const result = await userService.assignRole(req.params.id, roleId);
+            res.json(result);
+        } catch (error) {
+            if (error.message === 'User not found' || error.message === 'Role not found') {
+                res.status(404).json({ message: error.message });
+            } else {
+                res.status(500).json({ error: error.message });
+            }
+        }
+    }
+
+    // DELETE /api/users/:id/roles/:roleId - Remove role from user
+    async removeRole(req, res) {
+        try {
+            const result = await userService.removeRole(req.params.id, req.params.roleId);
+            res.json(result);
+        } catch (error) {
+            if (error.message === 'User not found' || error.message === 'Role not found') {
+                res.status(404).json({ message: error.message });
+            } else {
+                res.status(500).json({ error: error.message });
+            }
+        }
+    }
+
+    // POST /api/users/:id/groups - Assign group to user
+    async assignGroup(req, res) {
+        try {
+            const { groupId } = req.body;
+            const result = await userService.assignGroup(req.params.id, groupId);
+            res.json(result);
+        } catch (error) {
+            if (error.message === 'User not found' || error.message === 'Group not found') {
+                res.status(404).json({ message: error.message });
+            } else {
+                res.status(500).json({ error: error.message });
+            }
+        }
+    }
+
+    // DELETE /api/users/:id/groups/:groupId - Remove group from user
+    async removeGroup(req, res) {
+        try {
+            const result = await userService.removeGroup(req.params.id, req.params.groupId);
+            res.json(result);
+        } catch (error) {
+            if (error.message === 'User not found' || error.message === 'Group not found') {
+                res.status(404).json({ message: error.message });
+            } else {
+                res.status(500).json({ error: error.message });
+            }
+        }
+    }
 }
 
 module.exports = new UserController();
