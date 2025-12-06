@@ -10,7 +10,15 @@ class AuthService {
     }
 
     async login(email, password) {
-        const user = await User.findOne({ where: { email } });
+        const { User, Role } = require('../models');
+        const user = await User.findOne({
+            where: { email },
+            include: [{
+                model: Role,
+                through: { attributes: [] },
+                attributes: ['id', 'name']
+            }]
+        });
         if (!user) {
             throw new Error('User not found');
         }
@@ -28,7 +36,11 @@ class AuthService {
 
         return {
             token,
-            user: { id: user.id, email: user.email }
+            user: {
+                id: user.id,
+                email: user.email,
+                Roles: user.Roles
+            }
         };
     }
 }

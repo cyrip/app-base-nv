@@ -43,11 +43,38 @@ onUnmounted(() => {
       <div class="flex gap-6 text-sm font-medium text-gray-300" v-if="$route.name !== 'login'">
         <router-link to="/" class="hover:text-neon-blue transition-colors duration-300">Home</router-link>
         <router-link to="/users" class="hover:text-neon-blue transition-colors duration-300">Users</router-link>
+        <router-link 
+          v-if="authStore.user?.Roles?.some(r => r.name === 'admin')" 
+          to="/roles" 
+          class="hover:text-neon-purple transition-colors duration-300"
+        >
+          Roles
+        </router-link>
+        <router-link 
+          v-if="authStore.user?.Roles?.some(r => r.name === 'admin')" 
+          to="/groups" 
+          class="hover:text-neon-purple transition-colors duration-300"
+        >
+          Groups
+        </router-link>
+        <router-link 
+          v-if="authStore.user?.Roles?.some(r => r.name === 'admin')" 
+          to="/permissions" 
+          class="hover:text-neon-blue transition-colors duration-300"
+        >
+          Permissions
+        </router-link>
       </div>
       <div v-if="$route.name !== 'login'" class="flex items-center gap-4">
          <div v-if="authStore.user" class="flex items-center gap-4">
             <div class="flex flex-col items-end">
               <span class="text-xs font-bold text-gray-400">{{ authStore.user.email }}</span>
+              <span class="text-[10px] text-gray-500" v-if="authStore.user.Roles">
+                Roles: {{ authStore.user.Roles.map(r => r.name).join(', ') }}
+              </span>
+              <span class="text-[10px] text-red-500" v-else>
+                No roles loaded - please logout and login again
+              </span>
               <div class="flex items-center gap-1.5">
                  <div class="w-1.5 h-1.5 rounded-full" :class="socketState.connected ? 'bg-neon-blue animate-pulse' : 'bg-red-500'"></div>
                  <span class="text-[10px] font-bold tracking-wider" :class="socketState.connected ? 'text-neon-blue' : 'text-red-500'">

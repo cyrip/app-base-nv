@@ -4,6 +4,7 @@ import Login from '../modules/auth/views/Login.vue'
 import UserManagement from '../modules/users/views/UserManagement.vue'
 import RoleManagement from '../modules/admin/views/RoleManagement.vue'
 import GroupManagement from '../modules/admin/views/GroupManagement.vue'
+import PermissionManagement from '../modules/admin/views/PermissionManagement.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +33,11 @@ const router = createRouter({
             path: '/groups',
             name: 'groups',
             component: GroupManagement
+        },
+        {
+            path: '/permissions',
+            name: 'permissions',
+            component: PermissionManagement
         }
     ]
 })

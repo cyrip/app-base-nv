@@ -5,6 +5,7 @@ const { sequelize } = require('./src/models');
 const PORT = process.env.PORT || 3000;
 
 const seedUsers = require('./src/seeders/init.js');
+require('./src/helpers/authHelpers'); // Load User helper methods
 
 const http = require('http');
 const socketService = require('./src/services/socketService');
