@@ -23,7 +23,9 @@ async function seedModules() {
             });
             const chatPerm = await Permission.findOne({ where: { name: 'chat.use' } });
             if (chatPerm) {
-                await chatModule.addPermission(chatPerm);
+                await chatModule.setPermissions([chatPerm]);
+            } else {
+                await chatModule.setPermissions([]);
             }
         }
 
@@ -31,17 +33,19 @@ async function seedModules() {
         if (profileModule) {
             const profilePerm = await Permission.findOne({ where: { name: 'profile.view' } });
             if (profilePerm) {
-                await profileModule.addPermission(profilePerm);
+                await profileModule.setPermissions([profilePerm]);
+            } else {
+                await profileModule.setPermissions([]);
             }
         }
 
         const moduleAdmin = await Module.findOne({ where: { key: 'modules' } });
         if (moduleAdmin) {
             const managePerm = await Permission.findOne({ where: { name: 'module.manage' } });
-            const adminPerm = await Permission.findOne({ where: { name: 'moduleadmin.admin' } });
-            const permsToAdd = [managePerm, adminPerm].filter(Boolean);
-            if (permsToAdd.length) {
-                await moduleAdmin.addPermissions(permsToAdd);
+            if (managePerm) {
+                await moduleAdmin.setPermissions([managePerm]);
+            } else {
+                await moduleAdmin.setPermissions([]);
             }
         }
 

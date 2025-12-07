@@ -14,7 +14,6 @@ async function seedPermissions() {
             { name: 'group.manage', description: 'Manage groups' },
             { name: 'permission.manage', description: 'Manage permissions' },
             { name: 'module.manage', description: 'Manage application modules' },
-            { name: 'moduleadmin.admin', description: 'Admin access to ModuleAdmin' },
             { name: 'chat.use', description: 'Use chat module' },
             { name: 'profile.view', description: 'View profile module' }
         ];
@@ -50,6 +49,9 @@ async function seedPermissions() {
         });
         await userRole.setPermissions(userPerms);
         console.log(`Assigned ${userPerms.length} permissions to user role`);
+
+        // Clean up deprecated moduleadmin.admin permission if it exists
+        await Permission.destroy({ where: { name: 'moduleadmin.admin' } });
 
         console.log('Permissions seeding completed successfully!');
     } catch (error) {
