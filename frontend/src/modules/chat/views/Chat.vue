@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuthStore } from '../../auth/stores/auth';
 import { useI18n } from 'vue-i18n';
 import { socketState, getSocket } from '../../../services/socket';
+import { toastService } from '../../../services/toastService';
 
 const authStore = useAuthStore();
 const { t } = useI18n();
@@ -13,6 +14,8 @@ const channels = ref([]);
 const users = ref([]);
 const activeChannelId = ref(null);
 const messages = ref([]);
+const unreadCounts = reactive({});
+const messageListRef = ref(null);
 const loadingMessages = ref(false);
 const creatingChannel = ref(false);
 const showChannelModal = ref(false);
@@ -38,6 +41,9 @@ const loadChannels = async () => {
   try {
     const res = await axios.get(`${API_URL}/channels`, authHeaders());
     channels.value = res.data;
+    res.data.forEach(ch => {
+      if (unreadCounts[ch.id] === undefined) unreadCounts[ch.id] = 0;
+    });
   } catch (e) {
     console.error('Failed to load channels', e);
     channels.value = [];
@@ -62,6 +68,7 @@ const loadUsers = async () => {
 
 const selectChannel = async (channelId) => {
   activeChannelId.value = channelId;
+  unreadCounts[channelId] = 0;
   await loadMessages(channelId);
 };
 
@@ -70,6 +77,11 @@ const loadMessages = async (channelId) => {
   try {
     const res = await axios.get(`${API_URL}/channels/${channelId}/messages`, authHeaders());
     messages.value = res.data.reverse();
+    requestAnimationFrame(() => {
+      if (messageListRef.value) {
+        messageListRef.value.scrollTop = messageListRef.value.scrollHeight;
+      }
+    });
   } catch (e) {
     console.error('Failed to load messages', e);
     messages.value = [];
@@ -99,6 +111,7 @@ const sendMessage = async () => {
     fromUserId: authStore.user?.id,
     channelId: activeChannelId.value,
     createdAt: new Date().toISOString(),
+    pending: true,
     FromUser: {
       email: authStore.user?.email
     }
@@ -112,6 +125,11 @@ const sendMessage = async () => {
     if (index !== -1 && res.data) {
       messages.value[index] = res.data;
     }
+    requestAnimationFrame(() => {
+      if (messageListRef.value) {
+        messageListRef.value.scrollTop = messageListRef.value.scrollHeight;
+      }
+    });
   } catch (e) {
     console.error('Failed to send message', e);
     // Remove temp message on error
@@ -138,6 +156,8 @@ const createChannel = async () => {
     creatingChannel.value = false;
   }
 };
+
+// Placeholder for future search/pagination hooks
 
 const selectUser = (id) => {
   const idNum = Number(id);
@@ -184,13 +204,54 @@ const openDirectChat = async (userId) => {
 const setupSocket = () => {
   const socket = getSocket();
   if (!socket) return;
+
+  // Avoid stacking duplicate listeners if this component remounts
+  socket.off('channel:message');
+  socket.off('channel:created');
+
+    const showMessageToast = (msg) => {
+      // Don't toast your own message; only notify on inbound
+      if (msg.fromUserId === authStore.user?.id) return;
+      const channel = channels.value.find(c => Number(c.id) === Number(msg.channelId));
+      const channelLabel = channel?.name || t('common.chat.directChannel');
+      const sender = msg.FromUser?.email || t('common.chat.unknownSender') || 'Someone';
+      const preview = (msg.content || '').toString();
+      const snippet = preview.length > 120 ? `${preview.slice(0, 120)}…` : preview;
+      toastService.info(`${sender} • ${channelLabel}: ${snippet}`);
+    };
+
   socket.on('channel:message', (msg) => {
-    if (msg.channelId === activeChannelId.value) {
-      // Avoid duplicates - check if message already exists
-      const exists = messages.value.some(m => m.id === msg.id);
-      if (!exists) {
-        messages.value.push(msg);
+    // Always notify on inbound message
+    showMessageToast(msg);
+
+    // Increment unread if it's for another channel
+    if (msg.channelId !== activeChannelId.value) {
+      unreadCounts[msg.channelId] = (unreadCounts[msg.channelId] || 0) + 1;
+    }
+
+    // Only render into the current message list if we are on that channel
+    if (msg.channelId !== activeChannelId.value) return;
+
+    // If this is a locally pending message from the same user/content, replace it
+    if (msg.fromUserId === authStore.user?.id) {
+      const pendingIdx = messages.value.findIndex(
+        m => m.pending && m.content === msg.content && m.channelId === msg.channelId
+      );
+      if (pendingIdx !== -1) {
+        messages.value[pendingIdx] = msg;
+        return;
       }
+    }
+
+    // Avoid duplicates - check if message already exists by id
+    const exists = messages.value.some(m => m.id === msg.id);
+    if (!exists) {
+      messages.value.push(msg);
+      requestAnimationFrame(() => {
+        if (messageListRef.value) {
+          messageListRef.value.scrollTop = messageListRef.value.scrollHeight;
+        }
+      });
     }
   });
   socket.on('channel:created', (channel) => {
@@ -217,6 +278,7 @@ const addChannelIfMissing = (channel) => {
   const exists = channels.value.some(c => Number(c.id) === channelId);
   if (!exists) {
     channels.value.unshift({ ...channel, id: channelId });
+    if (unreadCounts[channelId] === undefined) unreadCounts[channelId] = 0;
   }
 };
 
@@ -269,10 +331,19 @@ onMounted(async () => {
           @click="selectChannel(ch.id)"
           :class="[
             'w-full text-left px-3 py-2 rounded-lg border transition-colors',
-            activeChannelId === ch.id ? 'border-neon-blue/50 bg-neon-blue/10 text-white' : 'border-white/10 text-gray-300 hover:border-neon-blue/30'
+            activeChannelId === ch.id ? 'border-neon-blue/50 bg-neon-blue/10 text-white' : 'border-white/10 text-gray-300 hover:border-neon-blue/30',
+            unreadCounts[ch.id] > 0 && activeChannelId !== ch.id ? 'animate-pulse border-neon-purple/50 bg-neon-purple/5' : ''
           ]"
         >
-          <div class="text-sm font-bold">{{ ch.name || t('common.chat.directChannel') }}</div>
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-sm font-bold">{{ ch.name || t('common.chat.directChannel') }}</div>
+            <span
+              v-if="unreadCounts[ch.id] > 0"
+              class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-neon-purple/30 text-white border border-neon-purple/50"
+            >
+              {{ unreadCounts[ch.id] }}
+            </span>
+          </div>
           <div class="text-xs text-gray-400 truncate">
             {{ (ch.ChannelParticipants || []).map(p => p.User?.email).join(', ') }}
           </div>
@@ -300,25 +371,37 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div class="flex-1 overflow-y-auto space-y-3 pr-2">
+      <div class="flex-1 overflow-y-auto space-y-3 pr-2" ref="messageListRef">
         <div v-if="!activeChannelId" class="text-gray-500 text-sm">{{ t('common.chat.selectPrompt') }}</div>
         <div v-else-if="loadingMessages" class="text-gray-400 text-sm">{{ t('common.chat.loading') }}</div>
-        <div v-else>
+        <div v-else class="space-y-4">
           <div
             v-for="msg in messages"
             :key="msg.id"
             :class="[
-              'p-3 rounded-lg border text-sm max-w-3xl',
+              'p-3 rounded-lg border text-sm max-w-3xl flex flex-col gap-1',
               msg.fromUserId === authStore.user?.id
-                ? 'ml-auto bg-neon-blue/10 border-neon-blue/30 text-white'
-                : 'mr-auto bg-white/5 border-white/10 text-gray-200'
+                ? 'ml-auto bg-neon-blue/15 border-neon-blue/40 text-white'
+                : 'mr-auto bg-white/5 border-white/15 text-gray-200'
             ]"
           >
-            <div class="flex items-center justify-between text-[11px] text-gray-400 mb-1">
-              <span>{{ msg.FromUser?.email || (msg.fromUserId === authStore.user?.id ? 'You' : '') }}</span>
+            <div
+              :class="[
+                'flex items-center text-[11px] text-gray-400 gap-2',
+                msg.fromUserId === authStore.user?.id ? 'justify-end text-right' : 'justify-start text-left'
+              ]"
+            >
+              <span class="font-semibold">
+                {{ msg.FromUser?.email || (msg.fromUserId === authStore.user?.id ? 'You' : t('common.chat.unknownSender')) }}
+              </span>
+              <span class="text-gray-500">•</span>
               <span>{{ new Date(msg.createdAt || msg.timestamp).toLocaleString() }}</span>
             </div>
-            <div class="prose prose-invert max-w-none" v-html="msg.content"></div>
+            <div
+              class="prose prose-invert max-w-none"
+              :class="msg.fromUserId === authStore.user?.id ? 'text-right' : 'text-left'"
+              v-html="msg.content"
+            ></div>
           </div>
         </div>
       </div>
