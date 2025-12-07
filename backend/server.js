@@ -11,7 +11,7 @@ const seedModules = require('./src/seeders/moduleSeeder');
 require('./src/helpers/authHelpers'); // Load User helper methods
 
 const http = require('http');
-const socketService = require('./src/services/socketService');
+const socketService = require('./src/modules/chat/services/socketService');
 
 // Database sync and server start
 const startServer = async () => {
@@ -25,7 +25,7 @@ const startServer = async () => {
         const ensureLanguageColumn = require('./src/migrations/addLanguageColumn');
         await ensureLanguageColumn();
         // Ensure message schema
-        const ensureMessageSchema = require('./src/migrations/ensureMessageSchema');
+        const ensureMessageSchema = require('./src/modules/chat/migrations/ensureMessageSchema');
         await ensureMessageSchema();
         // Ensure user soft delete column
         const ensureUserSoftDelete = require('./src/migrations/ensureUserSoftDelete');

@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Channel, ChannelParticipant, Message, User } = require('../models');
+const { Channel, ChannelParticipant, Message, User } = require('../../../models');
 
 const ensureMembership = async (channelId, userId) => {
     const count = await ChannelParticipant.count({

@@ -1,4 +1,5 @@
-const { Message, User } = require('../models');
+const { Op } = require('sequelize');
+const { Message, User } = require('../../../models');
 
 const sendMessage = async (fromUserId, toUserId, content) => {
     const message = await Message.create({ fromUserId, toUserId, content });
@@ -13,7 +14,7 @@ const sendMessage = async (fromUserId, toUserId, content) => {
 const getThread = async (userId, otherUserId) => {
     return Message.findAll({
         where: {
-            [require('sequelize').Op.or]: [
+            [Op.or]: [
                 { fromUserId: userId, toUserId: otherUserId },
                 { fromUserId: otherUserId, toUserId: userId }
             ]

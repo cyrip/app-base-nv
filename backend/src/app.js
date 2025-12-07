@@ -7,8 +7,8 @@ const roleRoutes = require('./routes/roles');
 const groupRoutes = require('./routes/groups');
 const permissionRoutes = require('./routes/permissions');
 const languageRoutes = require('./routes/languages');
-const messageRoutes = require('./routes/messages');
-const channelRoutes = require('./routes/channels');
+const messageRoutes = require('./modules/chat/routes/messages');
+const channelRoutes = require('./modules/chat/routes/channels');
 const moduleRoutes = require('./routes/modules');
 
 const app = express();

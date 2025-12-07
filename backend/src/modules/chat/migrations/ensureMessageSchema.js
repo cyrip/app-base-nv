@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../models');
+const { sequelize } = require('../../../models');
 
 const ensureMessageSchema = async () => {
     const qi = sequelize.getQueryInterface();

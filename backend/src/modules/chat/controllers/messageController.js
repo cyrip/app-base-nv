@@ -5,29 +5,22 @@ class MessageController {
     async send(req, res) {
         try {
             const { toUserId, content } = req.body;
-            if (!toUserId || !content) {
-                return res.status(400).json({ message: 'toUserId and content are required' });
-            }
-
             const message = await messageService.sendMessage(req.userId, toUserId, content);
-
-            // Emit to recipient if online and echo to sender
             socketService.sendToUser(toUserId, 'private-message', message);
             socketService.sendToUser(req.userId, 'private-message', message);
-
-            res.json({ message: 'Message sent', data: message });
+            res.json(message);
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(400).json({ error: error.message });
         }
     }
 
     async thread(req, res) {
         try {
-            const otherUserId = parseInt(req.params.userId, 10);
-            const messages = await messageService.getThread(req.userId, otherUserId);
+            const { userId } = req.params;
+            const messages = await messageService.getThread(req.userId, userId);
             res.json(messages);
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(400).json({ error: error.message });
         }
     }
 }
