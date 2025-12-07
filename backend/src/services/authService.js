@@ -12,13 +12,14 @@ class AuthService {
     }
 
     async login(email, password) {
-        const { User, Role, Language } = require('../models');
+        const { User, Role, Language, Permission } = require('../models');
         const user = await User.findOne({
             where: { email, isDeleted: false },
             include: [{
                 model: Role,
                 through: { attributes: [] },
-                attributes: ['id', 'name']
+                attributes: ['id', 'name'],
+                include: [{ model: Permission, through: { attributes: [] }, attributes: ['id', 'name'] }]
             }, {
                 model: Language,
                 as: 'Language',

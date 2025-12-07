@@ -1,4 +1,4 @@
-const { User, Role, Group, Language } = require('../models');
+const { User, Role, Group, Language, Permission } = require('../models');
 const bcrypt = require('bcryptjs');
 const { getDefaultLanguage } = require('./languageService');
 
@@ -143,7 +143,8 @@ class UserService {
             include: [{
                 model: Role,
                 through: { attributes: [] },
-                attributes: ['id', 'name']
+                attributes: ['id', 'name'],
+                include: [{ model: Permission, through: { attributes: [] }, attributes: ['id', 'name'] }]
             }, {
                 model: Group,
                 through: { attributes: [] },

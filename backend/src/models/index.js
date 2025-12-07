@@ -7,6 +7,9 @@ const Language = require('./Language');
 const Message = require('./Message');
 const Channel = require('./Channel');
 const ChannelParticipant = require('./ChannelParticipant');
+const Module = require('./Module');
+const ModuleSetting = require('./ModuleSetting');
+const ModulePermission = require('./ModulePermission');
 
 // Define Associations
 
@@ -42,6 +45,12 @@ ChannelParticipant.belongsTo(User, { foreignKey: 'userId' });
 Channel.hasMany(Message, { foreignKey: 'channelId' });
 Message.belongsTo(Channel, { foreignKey: 'channelId' });
 
+// Modules
+Module.hasMany(ModuleSetting, { as: 'Settings', foreignKey: 'moduleId', onDelete: 'CASCADE' });
+ModuleSetting.belongsTo(Module, { foreignKey: 'moduleId' });
+Module.belongsToMany(Permission, { through: ModulePermission, as: 'Permissions', foreignKey: 'moduleId', otherKey: 'permissionId' });
+Permission.belongsToMany(Module, { through: ModulePermission, as: 'Modules', foreignKey: 'permissionId', otherKey: 'moduleId' });
+
 module.exports = {
     sequelize,
     User,
@@ -51,5 +60,8 @@ module.exports = {
     Language,
     Message,
     Channel,
-    ChannelParticipant
+    ChannelParticipant,
+    Module,
+    ModuleSetting,
+    ModulePermission
 };

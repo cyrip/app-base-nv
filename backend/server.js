@@ -6,6 +6,8 @@ const PORT = process.env.PORT || 3000;
 
 const seedUsers = require('./src/seeders/init.js');
 const seedLanguages = require('./src/seeders/languageSeeder');
+const seedPermissions = require('./src/seeders/permissions-seeder');
+const seedModules = require('./src/seeders/moduleSeeder');
 require('./src/helpers/authHelpers'); // Load User helper methods
 
 const http = require('http');
@@ -29,13 +31,17 @@ const startServer = async () => {
         const ensureUserSoftDelete = require('./src/migrations/ensureUserSoftDelete');
         await ensureUserSoftDelete();
 
-        // Run seeders
-        await seedLanguages();
-        await seedUsers();
-
         // Run role migration
         const migrateRoles = require('./src/migrations/migrateRoles');
         await migrateRoles();
+
+        // Run seeders (languages, users rely on roles existing)
+        await seedLanguages();
+        await seedUsers();
+
+        // Seed permissions and modules
+        await seedPermissions();
+        await seedModules();
 
         // Drop old role column if it exists
         try {

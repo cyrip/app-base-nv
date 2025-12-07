@@ -7,6 +7,11 @@ import GroupManagement from '../modules/admin/views/GroupManagement.vue'
 import PermissionManagement from '../modules/admin/views/PermissionManagement.vue'
 import UserProfile from '../modules/profile/views/UserProfile.vue'
 import Chat from '../modules/chat/views/Chat.vue'
+import ModuleAdmin from '../modules/moduleAdmin/views/ModuleAdmin.vue'
+import ModuleDisabled from '../modules/moduleAdmin/views/ModuleDisabled.vue'
+import { useModuleStore } from '../modules/modules/stores/modules'
+import { useAuthStore } from '../modules/auth/stores/auth'
+import { useAuthGuard } from './moduleGuard'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,34 +29,55 @@ const router = createRouter({
         {
             path: '/users',
             name: 'users',
-            component: UserManagement
+            component: UserManagement,
+            meta: { moduleKey: 'users' }
         },
         {
             path: '/roles',
             name: 'roles',
-            component: RoleManagement
+            component: RoleManagement,
+            meta: { moduleKey: 'roles' }
         },
         {
             path: '/groups',
             name: 'groups',
-            component: GroupManagement
+            component: GroupManagement,
+            meta: { moduleKey: 'groups' }
         },
         {
             path: '/permissions',
             name: 'permissions',
-            component: PermissionManagement
+            component: PermissionManagement,
+            meta: { moduleKey: 'permissions' }
+        },
+        {
+            path: '/modules',
+            name: 'modules',
+            component: ModuleAdmin,
+            meta: { moduleKey: 'modules' }
         },
         {
             path: '/chat',
             name: 'chat',
-            component: Chat
+            component: Chat,
+            meta: { moduleKey: 'chat' }
         },
         {
             path: '/profile',
             name: 'profile',
-            component: UserProfile
+            component: UserProfile,
+            meta: { moduleKey: 'profile' }
+        },
+        {
+            path: '/module-disabled/:key',
+            name: 'module-disabled',
+            component: ModuleDisabled,
+            props: true
         }
     ]
 })
+
+const { guardModuleAccess } = useAuthGuard();
+router.beforeEach(guardModuleAccess);
 
 export default router

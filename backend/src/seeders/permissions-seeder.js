@@ -13,6 +13,10 @@ async function seedPermissions() {
             { name: 'role.manage', description: 'Manage roles' },
             { name: 'group.manage', description: 'Manage groups' },
             { name: 'permission.manage', description: 'Manage permissions' },
+            { name: 'module.manage', description: 'Manage application modules' },
+            { name: 'moduleadmin.admin', description: 'Admin access to ModuleAdmin' },
+            { name: 'chat.use', description: 'Use chat module' },
+            { name: 'profile.view', description: 'View profile module' }
         ];
 
         // Create permissions
@@ -38,23 +42,26 @@ async function seedPermissions() {
         await adminRole.setPermissions(allPermissions);
         console.log(`Assigned ${allPermissions.length} permissions to admin role`);
 
-        // Assign only user.view to user role
-        const viewPermission = await Permission.findOne({ where: { name: 'user.view' } });
-        await userRole.setPermissions([viewPermission]);
-        console.log('Assigned user.view permission to user role');
+        // Assign limited set to user role
+        const userPerms = await Permission.findAll({
+            where: {
+                name: ['user.view', 'chat.use', 'profile.view']
+            }
+        });
+        await userRole.setPermissions(userPerms);
+        console.log(`Assigned ${userPerms.length} permissions to user role`);
 
         console.log('Permissions seeding completed successfully!');
     } catch (error) {
         console.error('Error seeding permissions:', error);
         throw error;
-    } finally {
-        await sequelize.close();
     }
 }
 
 // Run if called directly
 if (require.main === module) {
     seedPermissions()
+        .then(() => sequelize.close())
         .then(() => process.exit(0))
         .catch(err => {
             console.error(err);

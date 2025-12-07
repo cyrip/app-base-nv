@@ -7,8 +7,10 @@ import ToastContainer from './components/ToastContainer.vue';
 import LanguageSwitcher from './components/LanguageSwitcher.vue';
 import { useAuthStore } from './modules/auth/stores/auth';
 import { useI18n } from 'vue-i18n';
+import { useModuleStore } from './modules/modules/stores/modules';
 
 const authStore = useAuthStore();
+const moduleStore = useModuleStore();
 const router = useRouter();
 const { t } = useI18n();
 
@@ -17,12 +19,16 @@ const handleLogout = () => {
   router.push('/login');
 };
 
+const isEnabled = (key) => moduleStore.isEnabled(key);
+
 onMounted(() => {
   // In a real app, you'd watch for auth state changes. 
   // For now, we'll try to init if a token exists in localStorage (common pattern)
   const token = localStorage.getItem('token');
   if (token) {
     initSocket(token);
+    moduleStore.fetchModules();
+    authStore.refreshProfile().catch(() => {});
   }
 });
 
@@ -44,30 +50,37 @@ onUnmounted(() => {
         <span class="text-white">{{ t('common.app.title').substring(5) }}</span>
       </div>
       <div class="flex gap-6 text-sm font-medium text-gray-300" v-if="$route.name !== 'login'">
-        <router-link to="/" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.home') }}</router-link>
-        <router-link to="/users" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.users') }}</router-link>
-        <router-link to="/chat" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.chat') }}</router-link>
-        <router-link to="/profile" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.profile') }}</router-link>
+        <router-link v-if="isEnabled('landing')" to="/" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.home') }}</router-link>
+        <router-link v-if="isEnabled('users')" to="/users" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.users') }}</router-link>
+        <router-link v-if="isEnabled('chat') && moduleStore.hasAccess('chat', authStore.permissionNames)" to="/chat" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.chat') }}</router-link>
+        <router-link v-if="isEnabled('profile')" to="/profile" class="hover:text-neon-blue transition-colors duration-300">{{ t('common.app.profile') }}</router-link>
         <router-link 
-          v-if="authStore.user?.Roles?.some(r => r.name === 'admin')" 
+          v-if="authStore.user?.Roles?.some(r => r.name === 'admin') && isEnabled('roles')" 
           to="/roles" 
           class="hover:text-neon-purple transition-colors duration-300"
         >
           {{ t('common.app.roles') }}
         </router-link>
         <router-link 
-          v-if="authStore.user?.Roles?.some(r => r.name === 'admin')" 
+          v-if="authStore.user?.Roles?.some(r => r.name === 'admin') && isEnabled('groups')" 
           to="/groups" 
           class="hover:text-neon-purple transition-colors duration-300"
         >
           {{ t('common.app.groups') }}
         </router-link>
         <router-link 
-          v-if="authStore.user?.Roles?.some(r => r.name === 'admin')" 
+          v-if="authStore.user?.Roles?.some(r => r.name === 'admin') && isEnabled('permissions')" 
           to="/permissions" 
           class="hover:text-neon-blue transition-colors duration-300"
         >
           {{ t('common.app.permissions') }}
+        </router-link>
+        <router-link 
+          v-if="authStore.user?.Roles?.some(r => r.name === 'admin') && isEnabled('modules')" 
+          to="/modules" 
+          class="hover:text-neon-blue transition-colors duration-300"
+        >
+          Module Admin
         </router-link>
       </div>
       <div v-if="$route.name !== 'login'" class="flex items-center gap-4">

@@ -9,6 +9,7 @@ const permissionRoutes = require('./routes/permissions');
 const languageRoutes = require('./routes/languages');
 const messageRoutes = require('./routes/messages');
 const channelRoutes = require('./routes/channels');
+const moduleRoutes = require('./routes/modules');
 
 const app = express();
 
@@ -24,5 +25,6 @@ app.use('/permissions', permissionRoutes);
 app.use('/languages', languageRoutes);
 app.use('/messages', messageRoutes);
 app.use('/channels', channelRoutes);
+app.use('/modules', moduleRoutes);
 
 module.exports = app;
