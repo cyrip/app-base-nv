@@ -10,6 +10,7 @@ const ChannelParticipant = require('../modules/chat/models/ChannelParticipant');
 const Module = require('../modules/moduleAdmin/models/Module');
 const ModuleSetting = require('../modules/moduleAdmin/models/ModuleSetting');
 const ModulePermission = require('../modules/moduleAdmin/models/ModulePermission');
+const Theme = require('../modules/theme/models/Theme');
 
 // Define Associations
 
@@ -63,5 +64,6 @@ module.exports = {
     ChannelParticipant,
     Module,
     ModuleSetting,
-    ModulePermission
+    ModulePermission,
+    Theme
 };

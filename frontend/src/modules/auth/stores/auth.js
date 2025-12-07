@@ -43,6 +43,12 @@ export const useAuthStore = defineStore('auth', {
             this.user = res.data
             localStorage.setItem('user', JSON.stringify(this.user))
         },
+        applyThemeConfig(config) {
+            if (typeof document === 'undefined') return
+            Object.entries(config || {}).forEach(([k, v]) => {
+                document.documentElement.style.setProperty(k, v)
+            })
+        },
         setUser(user) {
             this.user = user
             localStorage.setItem('user', JSON.stringify(user))

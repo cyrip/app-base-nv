@@ -10,6 +10,7 @@ const languageRoutes = require('./routes/languages');
 const messageRoutes = require('./modules/chat/routes/messages');
 const channelRoutes = require('./modules/chat/routes/channels');
 const moduleRoutes = require('./modules/moduleAdmin/routes/modules');
+const themeRoutes = require('./modules/theme/routes/themes');
 
 const app = express();
 
@@ -26,5 +27,6 @@ app.use('/languages', languageRoutes);
 app.use('/messages', messageRoutes);
 app.use('/channels', channelRoutes);
 app.use('/modules', moduleRoutes);
+app.use('/themes', themeRoutes);
 
 module.exports = app;

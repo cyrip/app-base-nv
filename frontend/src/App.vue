@@ -8,9 +8,11 @@ import LanguageSwitcher from './components/LanguageSwitcher.vue';
 import { useAuthStore } from './modules/auth/stores/auth';
 import { useI18n } from 'vue-i18n';
 import { useModuleStore } from './modules/modules/stores/modules';
+import { useThemeStore } from './modules/themes/stores/theme';
 
 const authStore = useAuthStore();
 const moduleStore = useModuleStore();
+const themeStore = useThemeStore();
 const router = useRouter();
 const { t } = useI18n();
 
@@ -29,6 +31,7 @@ onMounted(() => {
     initSocket(token);
     moduleStore.fetchModules();
     authStore.refreshProfile().catch(() => {});
+    themeStore.fetchThemes();
   }
 });
 
@@ -38,7 +41,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-deep-space text-white overflow-hidden relative selection:bg-neon-blue selection:text-deep-space font-sans">
+  <div class="min-h-screen overflow-hidden relative font-sans" :style="{ background: 'var(--bg)', color: 'var(--text)' }">
     <!-- Background Glow -->
     <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-neon-purple/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
     <div class="fixed bottom-0 right-0 w-[600px] h-[600px] bg-neon-blue/10 blur-[100px] rounded-full pointer-events-none z-0"></div>
@@ -81,6 +84,13 @@ onUnmounted(() => {
           class="hover:text-neon-blue transition-colors duration-300"
         >
           Module Admin
+        </router-link>
+        <router-link 
+          v-if="isEnabled('themes') && moduleStore.hasAccess('themes', authStore.permissionNames)" 
+          to="/themes" 
+          class="hover:text-neon-blue transition-colors duration-300"
+        >
+          Themes
         </router-link>
       </div>
       <div v-if="$route.name !== 'login'" class="flex items-center gap-4">

@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-    @apply bg-deep-space text-white;
+:root {
+  --bg: #0a0a1f;
+  --text: #f5f7ff;
+  --primary: #38bdf8;
+  --accent: #a855f7;
 }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+[data-theme='light'] .bg-white\/5 { background-color: rgba(0,0,0,0.05) !important; }
+[data-theme='light'] .bg-black\/30 { background-color: rgba(0,0,0,0.08) !important; }
+[data-theme='light'] .bg-white\/10 { background-color: rgba(0,0,0,0.08) !important; }
+[data-theme='light'] .text-white { color: var(--text) !important; }
+[data-theme='light'] .text-gray-400 { color: #334155 !important; }
+[data-theme='light'] .text-gray-300 { color: #1f2937 !important; }
+[data-theme='light'] .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
+[data-theme='light'] .border-white\/20 { border-color: rgba(0,0,0,0.12) !important; }

@@ -5,6 +5,7 @@ const DEFAULT_MODULES = [
     { key: 'modules', name: 'ModuleAdmin', description: 'Manage modules and their settings', enabled: true },
     { key: 'chat', name: 'Chat', description: 'Team chat', enabled: true },
     { key: 'profile', name: 'Profile', description: 'User profile', enabled: true },
+    { key: 'themes', name: 'Themes', description: 'Theme management', enabled: true },
 ];
 
 async function seedModules() {
@@ -36,6 +37,16 @@ async function seedModules() {
                 await profileModule.setPermissions([profilePerm]);
             } else {
                 await profileModule.setPermissions([]);
+            }
+        }
+
+        const themesModule = await Module.findOne({ where: { key: 'themes' } });
+        if (themesModule) {
+            const themePerm = await Permission.findOne({ where: { name: 'theme.manage' } });
+            if (themePerm) {
+                await themesModule.setPermissions([themePerm]);
+            } else {
+                await themesModule.setPermissions([]);
             }
         }
 
