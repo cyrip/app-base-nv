@@ -1,4 +1,4 @@
-const { Module, ModuleSetting } = require('../models');
+const { Module, ModuleSetting, Permission } = require('../../../models');
 
 class ModuleController {
     async list(req, res) {
@@ -6,7 +6,7 @@ class ModuleController {
             const modules = await Module.findAll({
                 include: [
                     { model: ModuleSetting, as: 'Settings' },
-                    { model: require('../models').Permission, as: 'Permissions' }
+                    { model: Permission, as: 'Permissions' }
                 ]
             });
             res.json(modules);
@@ -43,7 +43,6 @@ class ModuleController {
             }
 
             if (Array.isArray(permissions)) {
-                const { Permission } = require('../models');
                 const perms = await Permission.findAll({ where: { name: permissions } });
                 await module.setPermissions(perms);
             }
@@ -51,7 +50,7 @@ class ModuleController {
             const withSettings = await Module.findByPk(module.id, {
                 include: [
                     { model: ModuleSetting, as: 'Settings' },
-                    { model: require('../models').Permission, as: 'Permissions' }
+                    { model: Permission, as: 'Permissions' }
                 ]
             });
             res.json(withSettings);

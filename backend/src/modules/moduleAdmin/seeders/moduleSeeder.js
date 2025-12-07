@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { sequelize, Module, ModuleSetting, Permission } = require('../models');
+const { sequelize, Module, ModuleSetting, Permission } = require('../../../models');
 
 const DEFAULT_MODULES = [
     { key: 'modules', name: 'ModuleAdmin', description: 'Manage modules and their settings', enabled: true },

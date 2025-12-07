@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 const seedUsers = require('./src/seeders/init.js');
 const seedLanguages = require('./src/seeders/languageSeeder');
 const seedPermissions = require('./src/seeders/permissions-seeder');
-const seedModules = require('./src/seeders/moduleSeeder');
+const seedModules = require('./src/modules/moduleAdmin/seeders/moduleSeeder');
 require('./src/helpers/authHelpers'); // Load User helper methods
 
 const http = require('http');

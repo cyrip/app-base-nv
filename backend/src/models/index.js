@@ -7,9 +7,9 @@ const Language = require('./Language');
 const Message = require('../modules/chat/models/Message');
 const Channel = require('../modules/chat/models/Channel');
 const ChannelParticipant = require('../modules/chat/models/ChannelParticipant');
-const Module = require('./Module');
-const ModuleSetting = require('./ModuleSetting');
-const ModulePermission = require('./ModulePermission');
+const Module = require('../modules/moduleAdmin/models/Module');
+const ModuleSetting = require('../modules/moduleAdmin/models/ModuleSetting');
+const ModulePermission = require('../modules/moduleAdmin/models/ModulePermission');
 
 // Define Associations
 
