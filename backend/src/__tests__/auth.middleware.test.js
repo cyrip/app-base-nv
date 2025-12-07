@@ -25,18 +25,23 @@ describe('Auth Middleware', () => {
         const { sequelize } = require('../models');
 
         // Ensure database is synced
-        await sequelize.sync({ force: false });
+        await sequelize.sync({ alter: true });
+    });
 
-        // Create test user and role
+    beforeEach(async () => {
+        // Create test user and role for each test
         user = await User.create({
-            email: 'test@example.com',
+            email: `test-${Date.now()}@example.com`,
             password: 'hashedpassword'
         });
 
-        adminRole = await Role.create({
-            name: 'admin',
-            description: 'Administrator'
-        });
+        adminRole = await Role.findOne({ where: { name: 'admin' } });
+        if (!adminRole) {
+            adminRole = await Role.create({
+                name: 'admin',
+                description: 'Administrator'
+            });
+        }
 
         await user.addRole(adminRole);
 
@@ -49,18 +54,22 @@ describe('Auth Middleware', () => {
         await sequelize.close();
     });
 
-    // Don't clear mocks between tests in this suite
+    afterEach(() => {
+        // Clear mock calls between tests
+        jest.clearAllMocks();
+    });
 
     describe('verifyToken', () => {
         it('should reject request without token', async () => {
             const req = mockRequest({});
             const res = mockResponse();
+            const localMockNext = jest.fn();
 
-            await verifyToken(req, res, mockNext);
+            await verifyToken(req, res, localMockNext);
 
             expect(res.status).toHaveBeenCalledWith(401);
             expect(res.json).toHaveBeenCalledWith({ message: 'No token provided' });
-            expect(mockNext).not.toHaveBeenCalled();
+            expect(localMockNext).not.toHaveBeenCalled();
         });
 
         it('should reject request with invalid token', async () => {
@@ -68,12 +77,13 @@ describe('Auth Middleware', () => {
                 authorization: 'Bearer invalid-token'
             });
             const res = mockResponse();
+            const localMockNext = jest.fn();
 
-            await verifyToken(req, res, mockNext);
+            await verifyToken(req, res, localMockNext);
 
             expect(res.status).toHaveBeenCalledWith(403);
             expect(res.json).toHaveBeenCalledWith({ message: 'Failed to authenticate token' });
-            expect(mockNext).not.toHaveBeenCalled();
+            expect(localMockNext).not.toHaveBeenCalled();
         });
 
         it('should accept request with valid token', async () => {
@@ -81,13 +91,14 @@ describe('Auth Middleware', () => {
                 authorization: `Bearer ${token}`
             });
             const res = mockResponse();
+            const localMockNext = jest.fn();
 
-            await verifyToken(req, res, mockNext);
+            await verifyToken(req, res, localMockNext);
 
             expect(req.user).toBeDefined();
             expect(req.user.id).toBe(user.id);
-            expect(req.user.email).toBe('test@example.com');
-            expect(mockNext).toHaveBeenCalled();
+            expect(req.user.email).toBe(user.email);
+            expect(localMockNext).toHaveBeenCalled();
         });
 
         it('should load user roles and groups', async () => {
@@ -95,8 +106,9 @@ describe('Auth Middleware', () => {
                 authorization: `Bearer ${token}`
             });
             const res = mockResponse();
+            const localMockNext = jest.fn();
 
-            await verifyToken(req, res, mockNext);
+            await verifyToken(req, res, localMockNext);
 
             expect(req.user.Roles).toBeDefined();
             expect(req.user.Roles).toHaveLength(1);

@@ -17,6 +17,11 @@ const seedUsers = async () => {
                 email: 'user@codeware.cc',
                 password: 'password',
                 role: 'user'
+            },
+            {
+                email: 'partner@codeware.cc',
+                password: 'password',
+                role: 'user'
             }
         ];
 

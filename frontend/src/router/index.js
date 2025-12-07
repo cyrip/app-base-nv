@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../modules/auth/stores/auth'
 import Landing from '../modules/landing/views/Landing.vue'
 import Login from '../modules/auth/views/Login.vue'
 import UserManagement from '../modules/users/views/UserManagement.vue'
@@ -24,34 +25,56 @@ const router = createRouter({
         {
             path: '/users',
             name: 'users',
-            component: UserManagement
+            component: UserManagement,
+            meta: { requiresAuth: true }
         },
         {
             path: '/roles',
             name: 'roles',
-            component: RoleManagement
+            component: RoleManagement,
+            meta: { requiresAuth: true }
         },
         {
             path: '/groups',
             name: 'groups',
-            component: GroupManagement
+            component: GroupManagement,
+            meta: { requiresAuth: true }
         },
         {
             path: '/permissions',
             name: 'permissions',
-            component: PermissionManagement
+            component: PermissionManagement,
+            meta: { requiresAuth: true }
         },
         {
             path: '/chat',
             name: 'chat',
-            component: Chat
+            component: Chat,
+            meta: { requiresAuth: true }
         },
         {
             path: '/profile',
             name: 'profile',
-            component: UserProfile
+            component: UserProfile,
+            meta: { requiresAuth: true }
         }
     ]
+})
+
+// Navigation guard to check authentication
+router.beforeEach((to, from, next) => {
+    const authStore = useAuthStore()
+    const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+
+    if (requiresAuth && !authStore.token) {
+        // Redirect to login if route requires auth and user is not authenticated
+        next({ name: 'login', query: { redirect: to.fullPath } })
+    } else if (to.name === 'login' && authStore.token) {
+        // Redirect to chat if already logged in and trying to access login
+        next({ name: 'chat' })
+    } else {
+        next()
+    }
 })
 
 export default router

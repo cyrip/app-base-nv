@@ -19,6 +19,19 @@ const Channel = sequelize.define('Channel', {
     createdBy: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    encryptionEnabled: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+    encryptionEnabledAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    encryptionEnabledBy: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     }
 }, {
     timestamps: true

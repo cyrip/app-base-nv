@@ -9,7 +9,7 @@ const Message = sequelize.define('Message', {
     },
     fromUserId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true // Allow null for system messages
     },
     toUserId: {
         type: DataTypes.INTEGER,
@@ -22,6 +22,15 @@ const Message = sequelize.define('Message', {
     content: {
         type: DataTypes.TEXT('long'),
         allowNull: false
+    },
+    encrypted: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+    encryptionMetadata: {
+        type: DataTypes.JSON,
+        allowNull: true
     }
 }, {
     timestamps: true

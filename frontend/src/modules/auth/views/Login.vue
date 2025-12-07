@@ -15,7 +15,9 @@ const error = ref('')
 const handleLogin = async () => {
   try {
     await authStore.login(email.value, password.value)
-    router.push('/users')
+    // Redirect to the page user was trying to access, or default to chat
+    const redirect = router.currentRoute.value.query.redirect || '/chat'
+    router.push(redirect)
   } catch (e) {
     error.value = t('auth.login.failed', { message: e.message })
   }

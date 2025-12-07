@@ -7,6 +7,8 @@ const Language = require('./Language');
 const Message = require('./Message');
 const Channel = require('./Channel');
 const ChannelParticipant = require('./ChannelParticipant');
+const UserPublicKey = require('./UserPublicKey');
+const ChannelSessionKey = require('./ChannelSessionKey');
 
 // Define Associations
 
@@ -42,6 +44,15 @@ ChannelParticipant.belongsTo(User, { foreignKey: 'userId' });
 Channel.hasMany(Message, { foreignKey: 'channelId' });
 Message.belongsTo(Channel, { foreignKey: 'channelId' });
 
+// Encryption associations
+User.hasMany(UserPublicKey, { foreignKey: 'userId' });
+UserPublicKey.belongsTo(User, { foreignKey: 'userId' });
+
+Channel.hasMany(ChannelSessionKey, { foreignKey: 'channelId' });
+ChannelSessionKey.belongsTo(Channel, { foreignKey: 'channelId' });
+User.hasMany(ChannelSessionKey, { foreignKey: 'userId' });
+ChannelSessionKey.belongsTo(User, { foreignKey: 'userId' });
+
 module.exports = {
     sequelize,
     User,
@@ -51,5 +62,7 @@ module.exports = {
     Language,
     Message,
     Channel,
-    ChannelParticipant
+    ChannelParticipant,
+    UserPublicKey,
+    ChannelSessionKey
 };

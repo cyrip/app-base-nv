@@ -29,6 +29,18 @@ const startServer = async () => {
         const ensureUserSoftDelete = require('./src/migrations/ensureUserSoftDelete');
         await ensureUserSoftDelete();
 
+        // Run encryption migrations
+        const addChannelEncryption = require('./src/migrations/addChannelEncryption');
+        await addChannelEncryption();
+        const addMessageEncryption = require('./src/migrations/addMessageEncryption');
+        await addMessageEncryption();
+        const createUserPublicKeys = require('./src/migrations/createUserPublicKeys');
+        await createUserPublicKeys();
+        const createChannelSessionKeys = require('./src/migrations/createChannelSessionKeys');
+        await createChannelSessionKeys();
+        const allowNullFromUserId = require('./src/migrations/allowNullFromUserId');
+        await allowNullFromUserId.up(sequelize.getQueryInterface(), sequelize.Sequelize);
+
         // Run seeders
         await seedLanguages();
         await seedUsers();

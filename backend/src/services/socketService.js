@@ -78,6 +78,18 @@ const init = (server) => {
                 socket.emit('channel:error', { channelId, error: error.message });
             }
         });
+
+        // Handle explicit channel join requests
+        socket.on('join-channel', async ({ channelId }) => {
+            try {
+                // Verify user is a member of this channel
+                await chatService.ensureMembership(channelId, socket.userId);
+                socket.join(`channel-${channelId}`);
+                console.log(`User ${socket.userId} joined channel room ${channelId}`);
+            } catch (error) {
+                console.error(`Failed to join channel ${channelId}:`, error.message);
+            }
+        });
     });
 };
 

@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "worker": "node src/worker.js",
     "test": "jest --coverage",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "db:reset": "node reset-db.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
