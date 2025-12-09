@@ -10,6 +10,8 @@ export const useLlmStore = defineStore('llm', {
     conversations: [],
     messages: [],
     currentConversationId: null,
+    pollIntervalId: null,
+    pollTimeoutId: null,
     loading: false,
     error: ''
   }),
@@ -18,6 +20,26 @@ export const useLlmStore = defineStore('llm', {
       const authStore = useAuthStore();
       const token = authStore.token || localStorage.getItem('token');
       return token ? { Authorization: `Bearer ${token}` } : {};
+    },
+    stopPolling() {
+      if (this.pollIntervalId) {
+        clearInterval(this.pollIntervalId);
+        this.pollIntervalId = null;
+      }
+      if (this.pollTimeoutId) {
+        clearTimeout(this.pollTimeoutId);
+        this.pollTimeoutId = null;
+      }
+    },
+    startPolling(conversationId, durationMs = 15000, intervalMs = 1500) {
+      this.stopPolling();
+      if (!conversationId) return;
+      this.pollIntervalId = setInterval(() => {
+        this.fetchMessages(conversationId);
+      }, intervalMs);
+      this.pollTimeoutId = setTimeout(() => {
+        this.stopPolling();
+      }, durationMs);
     },
     async fetchAgents() {
       this.loading = true;
@@ -68,9 +90,7 @@ export const useLlmStore = defineStore('llm', {
       if (this.messages.length && this.currentConversationId === id) {
         this.messages = [];
       }
-      if (this.selectedConversationId === id) {
-        this.selectedConversationId = null;
-      }
+      this.currentConversationId = this.currentConversationId === id ? null : this.currentConversationId;
     },
     async fetchMessages(conversationId) {
       this.loading = true;
@@ -88,6 +108,9 @@ export const useLlmStore = defineStore('llm', {
     async startConversation(conversationId, initialPrompt, rounds = 1, delayMs = 0) {
       this.error = '';
       this.loading = true;
+      // Begin polling immediately so replies show as they are written
+      const extraDelay = Math.max(0, Number(delayMs) || 0) + 1000;
+      this.startPolling(conversationId, extraDelay + 8000, 1200);
       try {
         const res = await axios.post(
           `${API_URL}/llm/conversations/${conversationId}/start`,
@@ -101,7 +124,6 @@ export const useLlmStore = defineStore('llm', {
         }
         await this.fetchMessages(conversationId);
         // Follow-up refresh after delay window to ensure all turns show
-        const extraDelay = Math.max(0, Number(delayMs) || 0) + 1000;
         setTimeout(() => this.fetchMessages(conversationId), extraDelay);
         return newMsgs;
       } catch (e) {
@@ -118,6 +140,7 @@ export const useLlmStore = defineStore('llm', {
       if (res.data?.llmMsg) this.messages.push(res.data.llmMsg);
        // Ensure synced with backend ordering
        await this.fetchMessages(conversationId);
+       this.startPolling(conversationId);
       return res.data;
     },
     async deleteAgent(id) {

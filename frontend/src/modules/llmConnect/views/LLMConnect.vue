@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useLlmStore } from '../stores/llm';
 import { useModuleStore } from '../../modules/stores/modules';
 import { useAuthStore } from '../../auth/stores/auth';
@@ -14,13 +14,15 @@ const showConversationModal = ref(false);
 const editingAgent = ref(null);
 const showAgents = ref(false);
 const showConvos = ref(false);
-const selectedConversationId = ref(null);
-const currentConversationId = ref(null); // mirror in store for delete cleanup
+const activeConversationId = ref(null);
 const messageText = ref('');
 const initialPrompt = ref('');
 const startError = ref('');
 const rounds = ref(4);
 const delayMs = ref(5000);
+const typingMessageId = ref(null);
+const typingText = ref('');
+let typingInterval = null;
 
 const newAgent = ref({
   name: '',
@@ -36,9 +38,10 @@ const newConversation = ref({
 });
 
 const selectedConversation = computed(() =>
-  llmStore.conversations.find((c) => c.id === selectedConversationId.value)
+  llmStore.conversations.find((c) => c.id === activeConversationId.value)
 );
 const hasEnoughAgents = computed(() => (selectedConversation.value?.LLMConnectAgents || []).length >= 2);
+const isTyping = computed(() => llmStore.loading || !!llmStore.pollIntervalId);
 
 onMounted(async () => {
   await moduleStore.fetchModules();
@@ -46,9 +49,16 @@ onMounted(async () => {
   await llmStore.fetchConversations();
 });
 
+onUnmounted(() => {
+  llmStore.stopPolling();
+  if (typingInterval) {
+    clearInterval(typingInterval);
+    typingInterval = null;
+  }
+});
+
 const openConversation = async (convoId) => {
-  selectedConversationId.value = convoId;
-  currentConversationId.value = convoId;
+  activeConversationId.value = convoId;
   await llmStore.fetchMessages(convoId);
 };
 
@@ -90,8 +100,8 @@ const handleCreateConversation = async () => {
 const removeConversation = async (convoId) => {
   try {
     await llmStore.deleteConversation(convoId);
-    if (selectedConversationId.value === convoId) {
-      selectedConversationId.value = null;
+    if (activeConversationId.value === convoId) {
+      activeConversationId.value = null;
       llmStore.messages = [];
     }
   } catch (e) {
@@ -100,12 +110,12 @@ const removeConversation = async (convoId) => {
 };
 
 const startConversation = async () => {
-  if (!selectedConversationId.value) return;
+  if (!activeConversationId.value) return;
   startError.value = '';
   try {
     const r = Math.max(1, Number(rounds.value) || 1);
     const delay = Math.max(0, Number(delayMs.value) || 0);
-    await llmStore.startConversation(selectedConversationId.value, initialPrompt.value, r, delay);
+    await llmStore.startConversation(activeConversationId.value, initialPrompt.value, r, delay);
     initialPrompt.value = '';
   } catch (e) {
     startError.value = llmStore.error || e.response?.data?.error || e.message || 'Failed to start conversation';
@@ -113,13 +123,45 @@ const startConversation = async () => {
 };
 
 const sendMessage = async () => {
-  if (!selectedConversationId.value || !messageText.value.trim()) return;
+  if (!activeConversationId.value || !messageText.value.trim()) return;
   const convo = selectedConversation.value;
   const firstAgent = convo?.LLMConnectAgents?.[0];
   const agentId = firstAgent?.id || llmStore.agents[0]?.id;
-  await llmStore.sendMessage(selectedConversationId.value, { agentId, content: messageText.value });
+  await llmStore.sendMessage(activeConversationId.value, { agentId, content: messageText.value });
   messageText.value = '';
 };
+
+const runTypewriter = (msg) => {
+  if (!msg) return;
+  if (typingInterval) {
+    clearInterval(typingInterval);
+    typingInterval = null;
+  }
+  typingMessageId.value = msg.id;
+  typingText.value = '';
+  const content = msg.content || '';
+  let idx = 0;
+  typingInterval = setInterval(() => {
+    typingText.value = content.slice(0, idx + 1);
+    idx += 1;
+    if (idx >= content.length) {
+      clearInterval(typingInterval);
+      typingInterval = null;
+      typingMessageId.value = null;
+      typingText.value = '';
+    }
+  }, 15);
+};
+
+watch(
+  () => llmStore.messages.map((m) => m.id).join(','),
+  (newVal, oldVal) => {
+    if (newVal !== oldVal) {
+      const last = llmStore.messages[llmStore.messages.length - 1];
+      runTypewriter(last);
+    }
+  }
+);
 </script>
 
 <template>
@@ -213,7 +255,7 @@ const sendMessage = async () => {
                 :key="convo.id"
                 @click="openConversation(convo.id)"
                 class="p-3 rounded border border-white/10 bg-white/5 cursor-pointer hover:border-neon-blue/70"
-                :class="convo.id === selectedConversationId ? 'border-neon-blue/80 bg-neon-blue/10' : ''"
+                :class="convo.id === activeConversationId ? 'border-neon-blue/80 bg-neon-blue/10' : ''"
               >
                 <p class="font-semibold">{{ convo.title }}</p>
                 <p class="text-[11px] text-gray-400">
@@ -237,7 +279,7 @@ const sendMessage = async () => {
           <div class="flex items-center justify-between mb-2">
             <h3 class="font-semibold text-white">Messages</h3>
             <span class="text-xs text-gray-400">
-              {{ selectedConversationId ? 'Conversation #' + selectedConversationId : 'Select a conversation' }}
+              {{ activeConversationId ? 'Conversation #' + activeConversationId : 'Select a conversation' }}
             </span>
           </div>
           <div class="space-y-3">
@@ -266,29 +308,34 @@ const sendMessage = async () => {
               <button
                 class="px-3 py-2 text-xs font-bold text-white bg-neon-purple/60 rounded hover:bg-neon-purple/80 disabled:opacity-40 flex items-center gap-2"
                 @click="startConversation"
-                :disabled="!selectedConversationId || !hasEnoughAgents"
+                :disabled="!activeConversationId || !hasEnoughAgents"
               >
                 <span>Start</span>
                 <span v-if="llmStore.loading" class="w-3 h-3 border-2 border-white/60 border-t-transparent rounded-full animate-spin"></span>
               </button>
             </div>
-            <p v-if="!hasEnoughAgents && selectedConversationId" class="text-[11px] text-red-400">
+            <p v-if="!hasEnoughAgents && activeConversationId" class="text-[11px] text-red-400">
               Add at least two agents to start a conversation.
             </p>
             <p v-if="startError" class="text-[11px] text-red-400">{{ startError }}</p>
+            <p v-else-if="isTyping" class="text-[11px] text-gray-300 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-neon-blue animate-pulse"></span>
+              Agents are replying...
+            </p>
 
             <div class="h-80 border border-white/10 rounded-lg p-3 bg-black/30 overflow-y-auto space-y-3">
-              <div
-                v-for="msg in llmStore.messages"
-                :key="msg.id"
-                class="p-3 rounded border border-white/10 bg-white/5"
-              >
+                <div
+                  v-for="msg in llmStore.messages"
+                  :key="msg.id"
+                  class="p-3 rounded border border-white/10 bg-white/5"
+                >
                 <div class="flex items-center gap-2 text-sm font-semibold">
                   <span>{{ msg.Agent?.name || 'Agent' }}</span>
                   <span class="text-[11px] text-gray-400">({{ msg.role }})</span>
                 </div>
                 <div class="mt-1 text-sm text-gray-200 whitespace-pre-line">
-                  {{ msg.content }}
+                  <span v-if="typingMessageId === msg.id">{{ typingText }}</span>
+                  <span v-else>{{ msg.content }}</span>
                 </div>
               </div>
               <div v-if="!llmStore.messages.length" class="text-xs text-gray-500">No messages yet.</div>
@@ -300,12 +347,12 @@ const sendMessage = async () => {
                 placeholder="Send a manual message as agent 1"
                 class="flex-1 px-3 py-2 bg-black/40 border border-white/10 rounded text-white text-sm focus:outline-none focus:border-neon-blue"
                 @keyup.enter="sendMessage"
-                :disabled="!selectedConversationId"
+                :disabled="!activeConversationId"
               />
               <button
                 class="px-4 py-2 text-xs font-bold text-white bg-neon-blue/60 rounded hover:bg-neon-blue/80 disabled:opacity-40"
                 @click="sendMessage"
-                :disabled="!selectedConversationId"
+                :disabled="!activeConversationId"
               >
                 Send
               </button>
