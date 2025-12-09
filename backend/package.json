@@ -20,7 +20,8 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.6.5",
     "sequelize": "^6.35.1",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "axios": "^1.6.8"
   },
   "devDependencies": {
     "jest": "^29.7.0",

@@ -92,6 +92,13 @@ onUnmounted(() => {
         >
           Themes
         </router-link>
+        <router-link 
+          v-if="isEnabled('llmconnect') && moduleStore.hasAccess('llmconnect', authStore.permissionNames)" 
+          to="/llmconnect" 
+          class="hover:text-neon-blue transition-colors duration-300"
+        >
+          LLM Connect
+        </router-link>
       </div>
       <div v-if="$route.name !== 'login'" class="flex items-center gap-4">
          <LanguageSwitcher />

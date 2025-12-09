@@ -11,6 +11,7 @@ const messageRoutes = require('./modules/chat/routes/messages');
 const channelRoutes = require('./modules/chat/routes/channels');
 const moduleRoutes = require('./modules/moduleAdmin/routes/modules');
 const themeRoutes = require('./modules/theme/routes/themes');
+const llmRoutes = require('./modules/llmConnect/routes/llm');
 
 const app = express();
 
@@ -28,5 +29,6 @@ app.use('/messages', messageRoutes);
 app.use('/channels', channelRoutes);
 app.use('/modules', moduleRoutes);
 app.use('/themes', themeRoutes);
+app.use('/llm', llmRoutes);
 
 module.exports = app;

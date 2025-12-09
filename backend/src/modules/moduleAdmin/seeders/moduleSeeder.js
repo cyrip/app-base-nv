@@ -6,6 +6,7 @@ const DEFAULT_MODULES = [
     { key: 'chat', name: 'Chat', description: 'Team chat', enabled: true },
     { key: 'profile', name: 'Profile', description: 'User profile', enabled: true },
     { key: 'themes', name: 'Themes', description: 'Theme management', enabled: true },
+    { key: 'llmconnect', name: 'LLM Connect', description: 'Configure LLM agents and conversations', enabled: true },
 ];
 
 async function seedModules() {
@@ -57,6 +58,16 @@ async function seedModules() {
                 await moduleAdmin.setPermissions([managePerm]);
             } else {
                 await moduleAdmin.setPermissions([]);
+            }
+        }
+
+        const llmModule = await Module.findOne({ where: { key: 'llmconnect' } });
+        if (llmModule) {
+            const llmPerm = await Permission.findOne({ where: { name: 'llm.manage' } });
+            if (llmPerm) {
+                await llmModule.setPermissions([llmPerm]);
+            } else {
+                await llmModule.setPermissions([]);
             }
         }
 

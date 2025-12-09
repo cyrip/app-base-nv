@@ -10,6 +10,7 @@ import Chat from '../modules/chat/views/Chat.vue'
 import ModuleAdmin from '../modules/moduleAdmin/views/ModuleAdmin.vue'
 import ModuleDisabled from '../modules/moduleAdmin/views/ModuleDisabled.vue'
 import ThemeManagement from '../modules/themes/views/ThemeManagement.vue'
+import LLMConnect from '../modules/llmConnect/views/LLMConnect.vue'
 import { useModuleStore } from '../modules/modules/stores/modules'
 import { useAuthStore } from '../modules/auth/stores/auth'
 import { useAuthGuard } from './moduleGuard'
@@ -62,6 +63,12 @@ const router = createRouter({
             name: 'themes',
             component: ThemeManagement,
             meta: { moduleKey: 'themes' }
+        },
+        {
+            path: '/llmconnect',
+            name: 'llmconnect',
+            component: LLMConnect,
+            meta: { moduleKey: 'llmconnect' }
         },
         {
             path: '/chat',

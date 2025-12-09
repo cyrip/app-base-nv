@@ -11,6 +11,10 @@ const Module = require('../modules/moduleAdmin/models/Module');
 const ModuleSetting = require('../modules/moduleAdmin/models/ModuleSetting');
 const ModulePermission = require('../modules/moduleAdmin/models/ModulePermission');
 const Theme = require('../modules/theme/models/Theme');
+const LLMConnectAgent = require('../modules/llmConnect/models/Agent');
+const LLMConversation = require('../modules/llmConnect/models/Conversation');
+const LLMConversationAgent = require('../modules/llmConnect/models/ConversationAgent');
+const LLMMessage = require('../modules/llmConnect/models/Message');
 
 // Define Associations
 
@@ -52,6 +56,24 @@ ModuleSetting.belongsTo(Module, { foreignKey: 'moduleId' });
 Module.belongsToMany(Permission, { through: ModulePermission, as: 'Permissions', foreignKey: 'moduleId', otherKey: 'permissionId' });
 Permission.belongsToMany(Module, { through: ModulePermission, as: 'Modules', foreignKey: 'permissionId', otherKey: 'moduleId' });
 
+// LLM Connect associations
+LLMConversation.belongsToMany(LLMConnectAgent, {
+    through: LLMConversationAgent,
+    foreignKey: 'conversationId',
+    otherKey: 'agentId',
+    as: 'LLMConnectAgents'
+});
+LLMConnectAgent.belongsToMany(LLMConversation, {
+    through: LLMConversationAgent,
+    foreignKey: 'agentId',
+    otherKey: 'conversationId',
+    as: 'LLMConversations'
+});
+LLMMessage.belongsTo(LLMConversation, { foreignKey: 'conversationId', as: 'Conversation' });
+LLMConversation.hasMany(LLMMessage, { foreignKey: 'conversationId', as: 'Messages' });
+LLMMessage.belongsTo(LLMConnectAgent, { foreignKey: 'agentId', as: 'Agent' });
+LLMConnectAgent.hasMany(LLMMessage, { foreignKey: 'agentId', as: 'Messages' });
+
 module.exports = {
     sequelize,
     User,
@@ -65,5 +87,9 @@ module.exports = {
     Module,
     ModuleSetting,
     ModulePermission,
-    Theme
+    Theme,
+    LLMConnectAgent,
+    LLMConversation,
+    LLMConversationAgent,
+    LLMMessage
 };

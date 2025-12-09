@@ -16,7 +16,8 @@ async function seedPermissions() {
             { name: 'module.manage', description: 'Manage application modules' },
             { name: 'chat.use', description: 'Use chat module' },
             { name: 'profile.view', description: 'View profile module' },
-            { name: 'theme.manage', description: 'Manage themes' }
+            { name: 'theme.manage', description: 'Manage themes' },
+            { name: 'llm.manage', description: 'Manage LLM Connect module' }
         ];
 
         // Create permissions

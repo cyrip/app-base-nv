@@ -31,6 +31,9 @@ const startServer = async () => {
         // Ensure user soft delete column
         const ensureUserSoftDelete = require('./src/migrations/ensureUserSoftDelete');
         await ensureUserSoftDelete();
+        // Ensure LLM provider column exists
+        const ensureLlmProviderColumn = require('./src/modules/llmConnect/migrations/ensureLlmProviderColumn');
+        await ensureLlmProviderColumn();
 
         // Run role migration
         const migrateRoles = require('./src/migrations/migrateRoles');
