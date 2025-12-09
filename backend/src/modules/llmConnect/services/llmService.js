@@ -1,6 +1,13 @@
 const axios = require('axios');
 const { LLMMessage, LLMConnectAgent, LLMConversation } = require('../../../models');
 
+const buildSystemPrompt = (agent, other) => {
+    const otherLine = other ? `You are conversing with ${other.name} whose role is ${other.role || 'assistant'}.` : '';
+    const roleLine = agent.role ? `Your role: ${agent.role}.` : '';
+    const instructionsLine = agent.instructions ? `Instructions: ${agent.instructions}` : '';
+    return `You are ${agent.name}. ${roleLine} ${instructionsLine} ${otherLine} Stay in character and keep responses concise.`;
+};
+
 const buildHistoryForAgent = async (conversationId, agentId, limit = 30) => {
     const msgs = await LLMMessage.findAll({
         where: { conversationId },
@@ -63,7 +70,7 @@ const sendMessage = async ({ conversationId, fromAgentId, content }) => {
     });
 
     const history = await buildHistoryForAgent(conversationId, fromAgentId, 30);
-    const systemPrompt = agent.instructions || agent.role || 'You are an assistant.';
+    const systemPrompt = buildSystemPrompt(agent);
     const apiKey = agent.apiKey || process.env.OPENAI_API_KEY;
     let reply;
     try {
@@ -128,9 +135,7 @@ const startConversation = async ({ conversationId, rounds = 1, initialPrompt, de
     for (let r = 0; r < rounds; r++) {
         const responder = lastSpeaker.id === agentA.id ? agentB : agentA;
         const other = responder.id === agentA.id ? agentB : agentA;
-        const systemPrompt = responder.instructions
-            || responder.role
-            || `You are ${responder.name}, talking to ${other.name} whose role is ${other.role || 'assistant'}. Be concise and stay in character.`;
+        const systemPrompt = buildSystemPrompt(responder, other);
         let replyText;
         try {
             const perspectiveHistory = await buildHistoryForAgent(conversationId, responder.id, 50);
