@@ -1,16 +1,21 @@
 const axios = require('axios');
 const { LLMMessage, LLMConnectAgent, LLMConversation } = require('../../../models');
 
-const buildHistory = async (conversationId, limit = 20) => {
+const buildHistoryForAgent = async (conversationId, agentId, limit = 30) => {
     const msgs = await LLMMessage.findAll({
         where: { conversationId },
         order: [['createdAt', 'ASC']],
-        limit
+        limit,
+        include: [{ model: LLMConnectAgent, as: 'Agent' }]
     });
-    return msgs.map(m => ({
-        role: m.role === 'system' ? 'system' : m.role === 'assistant' ? 'assistant' : 'user',
-        content: m.content
-    }));
+    // Map conversation into the perspective of agentId:
+    // messages from agentId -> assistant, others -> user, prepend speaker name for clarity
+    return msgs.map(m => {
+        const speakerName = m.Agent?.name || 'Agent';
+        const content = `${speakerName}: ${m.content}`;
+        const role = m.agentId === agentId ? 'assistant' : 'user';
+        return { role, content };
+    });
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -57,7 +62,7 @@ const sendMessage = async ({ conversationId, fromAgentId, content }) => {
         content
     });
 
-    const history = await buildHistory(conversationId, 12);
+    const history = await buildHistoryForAgent(conversationId, fromAgentId, 30);
     const systemPrompt = agent.instructions || agent.role || 'You are an assistant.';
     const apiKey = agent.apiKey || process.env.OPENAI_API_KEY;
     let reply;
@@ -80,6 +85,7 @@ const sendMessage = async ({ conversationId, fromAgentId, content }) => {
         role: 'assistant',
         content: reply
     });
+    llmMsg.Agent = agent;
 
     return { userMsg, llmMsg };
 };
@@ -99,8 +105,8 @@ const startConversation = async ({ conversationId, rounds = 1, initialPrompt, de
     const agentB = agents[1];
     const createdMessages = [];
 
-    // Local history cache to avoid re-query each turn
-    const history = await buildHistory(conversationId, 50);
+    // Local history cache for quick append (we still fetch perspective history per responder)
+    const history = [];
 
     // Agent A kickoff
     const kickoffText = initialPrompt || agentA.instructions || agentA.role || 'Start the conversation.';
@@ -112,7 +118,7 @@ const startConversation = async ({ conversationId, rounds = 1, initialPrompt, de
     });
     kickoffMsg.Agent = agentA;
     createdMessages.push(kickoffMsg);
-    history.push({ role: 'assistant', content: kickoffText });
+    history.push({ role: 'assistant', content: `${agentA.name}: ${kickoffText}` });
 
     let lastSpeaker = agentA;
     let lastContent = kickoffText;
@@ -121,14 +127,18 @@ const startConversation = async ({ conversationId, rounds = 1, initialPrompt, de
     const delay = Math.max(0, Number(delayMs) || 0);
     for (let r = 0; r < rounds; r++) {
         const responder = lastSpeaker.id === agentA.id ? agentB : agentA;
-        const systemPrompt = responder.instructions || responder.role || `You are ${responder.name}.`;
+        const other = responder.id === agentA.id ? agentB : agentA;
+        const systemPrompt = responder.instructions
+            || responder.role
+            || `You are ${responder.name}, talking to ${other.name} whose role is ${other.role || 'assistant'}. Be concise and stay in character.`;
         let replyText;
         try {
+            const perspectiveHistory = await buildHistoryForAgent(conversationId, responder.id, 50);
             replyText = await callLLM({
                 provider: responder.provider || 'chatgpt',
                 apiKey: responder.apiKey || process.env.OPENAI_API_KEY,
                 systemPrompt,
-                history,
+                history: perspectiveHistory,
                 userInput: lastContent || 'Continue the conversation.'
             });
         } catch (err) {
@@ -144,7 +154,7 @@ const startConversation = async ({ conversationId, rounds = 1, initialPrompt, de
         });
         responderMsg.Agent = responder;
         createdMessages.push(responderMsg);
-        history.push({ role: 'assistant', content: replyText });
+        history.push({ role: 'assistant', content: `${responder.name}: ${replyText}` });
 
         lastSpeaker = responder;
         lastContent = replyText;

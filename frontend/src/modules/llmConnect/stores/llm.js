@@ -9,6 +9,7 @@ export const useLlmStore = defineStore('llm', {
     agents: [],
     conversations: [],
     messages: [],
+    currentConversationId: null,
     loading: false,
     error: ''
   }),
@@ -64,8 +65,11 @@ export const useLlmStore = defineStore('llm', {
       this.error = '';
       await axios.delete(`${API_URL}/llm/conversations/${id}`, { headers: this.authHeaders() });
       this.conversations = this.conversations.filter((c) => c.id !== id);
-      if (this.messages.length && id === this.currentConversationId) {
+      if (this.messages.length && this.currentConversationId === id) {
         this.messages = [];
+      }
+      if (this.selectedConversationId === id) {
+        this.selectedConversationId = null;
       }
     },
     async fetchMessages(conversationId) {
@@ -74,6 +78,7 @@ export const useLlmStore = defineStore('llm', {
       try {
         const res = await axios.get(`${API_URL}/llm/conversations/${conversationId}/messages`, { headers: this.authHeaders() });
         this.messages = res.data || [];
+        this.currentConversationId = conversationId;
       } catch (e) {
         this.error = e.response?.data?.error || e.message;
       } finally {
@@ -82,18 +87,28 @@ export const useLlmStore = defineStore('llm', {
     },
     async startConversation(conversationId, initialPrompt, rounds = 1, delayMs = 0) {
       this.error = '';
+      this.loading = true;
       try {
         const res = await axios.post(
           `${API_URL}/llm/conversations/${conversationId}/start`,
           { initialPrompt, rounds, delayMs },
           { headers: this.authHeaders() }
         );
-        // Refresh to get full agent info
+        // Optimistically append returned messages (if any), then refresh
+        const newMsgs = res.data?.messages || [];
+        if (newMsgs.length) {
+          this.messages.push(...newMsgs);
+        }
         await this.fetchMessages(conversationId);
-        return res.data?.messages || [];
+        // Follow-up refresh after delay window to ensure all turns show
+        const extraDelay = Math.max(0, Number(delayMs) || 0) + 1000;
+        setTimeout(() => this.fetchMessages(conversationId), extraDelay);
+        return newMsgs;
       } catch (e) {
         this.error = e.response?.data?.error || e.message;
         throw e;
+      } finally {
+        this.loading = false;
       }
     },
     async sendMessage(conversationId, payload) {
@@ -101,6 +116,8 @@ export const useLlmStore = defineStore('llm', {
       const res = await axios.post(`${API_URL}/llm/conversations/${conversationId}/messages`, payload, { headers: this.authHeaders() });
       if (res.data?.userMsg) this.messages.push(res.data.userMsg);
       if (res.data?.llmMsg) this.messages.push(res.data.llmMsg);
+       // Ensure synced with backend ordering
+       await this.fetchMessages(conversationId);
       return res.data;
     },
     async deleteAgent(id) {
