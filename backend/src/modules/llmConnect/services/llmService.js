@@ -112,23 +112,38 @@ const startConversation = async ({ conversationId, rounds = 1, initialPrompt, de
     const agentB = agents[1];
     const createdMessages = [];
 
-    // Local history cache for quick append (we still fetch perspective history per responder)
-    const history = [];
+    // Agent A kickoff: generate a real reply using the initial prompt (or a default)
+    const kickoffPrompt = initialPrompt || 'Start the conversation with your counterpart.';
+    let kickoffReply = '';
+    try {
+        const systemPromptA = buildSystemPrompt(agentA, agentB);
+        const perspectiveHistoryA = await buildHistoryForAgent(conversationId, agentA.id, 50);
+        kickoffReply = await callLLM({
+            provider: agentA.provider || 'chatgpt',
+            apiKey: agentA.apiKey || process.env.OPENAI_API_KEY,
+            systemPrompt: systemPromptA,
+            history: perspectiveHistoryA,
+            userInput: kickoffPrompt
+        });
+    } catch (err) {
+        console.error('LLM kickoff failed:', err.message);
+        kickoffReply = `LLM error: ${err.message || 'unknown error'}`;
+    }
 
-    // Agent A kickoff
-    const kickoffText = initialPrompt || agentA.instructions || agentA.role || 'Start the conversation.';
     const kickoffMsg = await LLMMessage.create({
         conversationId,
         agentId: agentA.id,
         role: 'assistant',
-        content: kickoffText
+        content: kickoffReply
     });
     kickoffMsg.Agent = agentA;
     createdMessages.push(kickoffMsg);
-    history.push({ role: 'assistant', content: `${agentA.name}: ${kickoffText}` });
+
+    // Local history cache for quick append (we still fetch perspective history per responder)
+    const history = [{ role: 'assistant', content: `${agentA.name}: ${kickoffReply}` }];
 
     let lastSpeaker = agentA;
-    let lastContent = kickoffText;
+    let lastContent = kickoffReply;
 
     // Each round = one reply from the other agent
     const delay = Math.max(0, Number(delayMs) || 0);

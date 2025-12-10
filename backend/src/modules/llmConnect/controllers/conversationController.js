@@ -48,6 +48,9 @@ class ConversationController {
             const { id } = req.params;
             const convo = await LLMConversation.findByPk(id);
             if (!convo) return res.status(404).json({ error: 'Conversation not found' });
+            // Clean up dependent rows to avoid FK constraint issues
+            await LLMMessage.destroy({ where: { conversationId: id } });
+            await LLMConversationAgent.destroy({ where: { conversationId: id } });
             await convo.destroy();
             res.json({ success: true });
         } catch (error) {
